@@ -14,6 +14,9 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
+import { Route as AuthenticatedMovimientosRouteImport } from './routes/_authenticated/movimientos'
+import { Route as AuthenticatedReportesRouteImport } from './routes/_authenticated/reportes'
+import { Route as AuthenticatedRetosRouteImport } from './routes/_authenticated/retos'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -39,18 +42,40 @@ const AuthenticatedInicioRoute = AuthenticatedInicioRouteImport.update({
   path: '/inicio',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMovimientosRoute =
+  AuthenticatedMovimientosRouteImport.update({
+    id: '/movimientos',
+    path: '/movimientos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReportesRoute = AuthenticatedReportesRouteImport.update({
+  id: '/reportes',
+  path: '/reportes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRetosRoute = AuthenticatedRetosRouteImport.update({
+  id: '/retos',
+  path: '/retos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/inicio': typeof AuthenticatedInicioRoute
+  '/movimientos': typeof AuthenticatedMovimientosRoute
+  '/reportes': typeof AuthenticatedReportesRoute
+  '/retos': typeof AuthenticatedRetosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/inicio': typeof AuthenticatedInicioRoute
+  '/movimientos': typeof AuthenticatedMovimientosRoute
+  '/reportes': typeof AuthenticatedReportesRoute
+  '/retos': typeof AuthenticatedRetosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -59,12 +84,29 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/inicio': typeof AuthenticatedInicioRoute
+  '/_authenticated/movimientos': typeof AuthenticatedMovimientosRoute
+  '/_authenticated/reportes': typeof AuthenticatedReportesRoute
+  '/_authenticated/retos': typeof AuthenticatedRetosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/reset-password' | '/inicio'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/inicio'
+    | '/movimientos'
+    | '/reportes'
+    | '/retos'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/reset-password' | '/inicio'
+  to:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/inicio'
+    | '/movimientos'
+    | '/reportes'
+    | '/retos'
   id:
     | '__root__'
     | '/'
@@ -72,6 +114,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/_authenticated/inicio'
+    | '/_authenticated/movimientos'
+    | '/_authenticated/reportes'
+    | '/_authenticated/retos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -118,15 +163,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInicioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/movimientos': {
+      id: '/_authenticated/movimientos'
+      path: '/movimientos'
+      fullPath: '/movimientos'
+      preLoaderRoute: typeof AuthenticatedMovimientosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reportes': {
+      id: '/_authenticated/reportes'
+      path: '/reportes'
+      fullPath: '/reportes'
+      preLoaderRoute: typeof AuthenticatedReportesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/retos': {
+      id: '/_authenticated/retos'
+      path: '/retos'
+      fullPath: '/retos'
+      preLoaderRoute: typeof AuthenticatedRetosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
+  AuthenticatedMovimientosRoute: typeof AuthenticatedMovimientosRoute
+  AuthenticatedReportesRoute: typeof AuthenticatedReportesRoute
+  AuthenticatedRetosRoute: typeof AuthenticatedRetosRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInicioRoute: AuthenticatedInicioRoute,
+  AuthenticatedMovimientosRoute: AuthenticatedMovimientosRoute,
+  AuthenticatedReportesRoute: AuthenticatedReportesRoute,
+  AuthenticatedRetosRoute: AuthenticatedRetosRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
