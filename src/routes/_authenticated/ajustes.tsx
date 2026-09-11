@@ -127,16 +127,19 @@ function Ajustes() {
         </div>
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
-            <Label htmlFor="anim">Animaciones de la planta</Label>
-            <p className="text-xs text-muted-foreground">Desactívalas si prefieres menos movimiento.</p>
+            <Label htmlFor="notif">Alertas y recordatorios</Label>
+            <p className="text-xs text-muted-foreground">
+              Avisos de presupuesto, retos y balance negativo.
+            </p>
           </div>
           <Switch
-            id="anim"
-            checked={profile?.animations_enabled ?? true}
-            onCheckedChange={(v) => updateProfile.mutate({ animations_enabled: v })}
+            id="notif"
+            checked={profile?.notifications_enabled ?? true}
+            onCheckedChange={(v) => updateProfile.mutate({ notifications_enabled: v })}
           />
         </div>
       </section>
+
 
       <CategoriesSection emojis={EMOJIS} />
       <BudgetsSection />

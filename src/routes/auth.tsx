@@ -11,9 +11,8 @@ import { FinancialPlant } from "@/components/FinancialPlant";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (s: Record<string, unknown>) => ({
-    mode: s.mode === "login" ? "login" : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): { mode?: "login" } =>
+    s["mode"] === "login" ? { mode: "login" } : {},
   head: () => ({
     meta: [
       { title: "Entrar a PlantWallet" },
