@@ -112,9 +112,9 @@ export function useSaveTransaction() {
     mutationFn: async (input: Partial<Transaction> & { id?: string }) => {
       const payload = { ...input, user_id: user!.id };
       if (input.id) {
-        must(await supabase.from("transactions").update(payload).eq("id", input.id).select());
+        must(await supabase.from("transactions").update(payload as never).eq("id", input.id).select());
       } else {
-        must(await supabase.from("transactions").insert(payload).select());
+        must(await supabase.from("transactions").insert(payload as never).select());
       }
       await supabase.rpc("recalc_challenges", { p_user: user!.id });
     },
@@ -140,8 +140,8 @@ export function useSaveCategory() {
   return useMutation({
     mutationFn: async (input: Partial<Category> & { id?: string }) => {
       const payload = { ...input, user_id: user!.id };
-      if (input.id) must(await supabase.from("categories").update(payload).eq("id", input.id).select());
-      else must(await supabase.from("categories").insert(payload).select());
+      if (input.id) must(await supabase.from("categories").update(payload as never).eq("id", input.id).select());
+      else must(await supabase.from("categories").insert(payload as never).select());
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["categories"] }),
   });
@@ -192,7 +192,7 @@ export function useStartChallenge() {
   const { user } = useAuth();
   return useMutation({
     mutationFn: async (input: Partial<UserChallenge>) => {
-      must(await supabase.from("user_challenges").insert({ ...input, user_id: user!.id }).select());
+      must(await supabase.from("user_challenges").insert({ ...input, user_id: user!.id } as never).select());
       await supabase.rpc("recalc_challenges", { p_user: user!.id });
     },
     onSuccess: () => qc.invalidateQueries(),

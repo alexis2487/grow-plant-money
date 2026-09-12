@@ -402,9 +402,8 @@ function SecuritySection() {
                 setBusy(true);
                 const { error } = await supabase.auth.updateUser({
                   password: next,
-                  // @ts-expect-error current_password es requerido por Cloud Auth
                   current_password: current,
-                });
+                } as { password: string });
                 setBusy(false);
                 if (error) return toast.error(error.message);
                 setCurrent("");
