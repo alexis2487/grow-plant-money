@@ -30,7 +30,7 @@ export function useCategories() {
           .from("categories")
           .select("*")
           .eq("user_id", user!.id)
-          .order("sort_order", { ascending: true }),
+          .order("name"),
       ) as Category[],
   });
 }
@@ -161,6 +161,53 @@ export function useSaveCategory() {
       const payload = { ...input, user_id: user!.id };
       if (input.id) must(await supabase.from("categories").update(payload as never).eq("id", input.id).select());
       else must(await supabase.from("categories").insert(payload as never).select());
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["categories"] }),
+  });
+}
+
+export const DEFAULT_CATEGORIES: Array<Omit<Category, "id" | "user_id">> = [
+  { name: "Vivienda", emoji: "🏠", type: "expense", is_essential: true, is_active: true, color: null, description: null },
+  { name: "Alimentación", emoji: "🍔", type: "expense", is_essential: true, is_active: true, color: null, description: null },
+  { name: "Mercado", emoji: "🛒", type: "expense", is_essential: true, is_active: true, color: null, description: null },
+  { name: "Transporte", emoji: "🚗", type: "expense", is_essential: true, is_active: true, color: null, description: null },
+  { name: "Combustible", emoji: "⛽", type: "expense", is_essential: true, is_active: true, color: null, description: null },
+  { name: "Servicios", emoji: "💡", type: "expense", is_essential: true, is_active: true, color: null, description: null },
+  { name: "Telefonía", emoji: "📱", type: "expense", is_essential: true, is_active: true, color: null, description: null },
+  { name: "Internet", emoji: "🌐", type: "expense", is_essential: true, is_active: true, color: null, description: null },
+  { name: "Educación", emoji: "🎓", type: "expense", is_essential: true, is_active: true, color: null, description: null },
+  { name: "Salud", emoji: "💊", type: "expense", is_essential: true, is_active: true, color: null, description: null },
+  { name: "Deudas", emoji: "💳", type: "expense", is_essential: true, is_active: true, color: null, description: null },
+  { name: "Mascotas", emoji: "🐶", type: "expense", is_essential: false, is_active: true, color: null, description: null },
+  { name: "Ropa", emoji: "👕", type: "expense", is_essential: false, is_active: true, color: null, description: null },
+  { name: "Entretenimiento", emoji: "🎮", type: "expense", is_essential: false, is_active: true, color: null, description: null },
+  { name: "Restaurantes", emoji: "🍽️", type: "expense", is_essential: false, is_active: true, color: null, description: null },
+  { name: "Compras", emoji: "🛍️", type: "expense", is_essential: false, is_active: true, color: null, description: null },
+  { name: "Viajes", emoji: "✈️", type: "expense", is_essential: false, is_active: true, color: null, description: null },
+  { name: "Suscripciones", emoji: "📺", type: "expense", is_essential: false, is_active: true, color: null, description: null },
+  { name: "Regalos", emoji: "🎁", type: "expense", is_essential: false, is_active: true, color: null, description: null },
+  { name: "Otros", emoji: "📦", type: "expense", is_essential: false, is_active: true, color: null, description: null },
+  { name: "Salario", emoji: "💼", type: "income", is_essential: true, is_active: true, color: null, description: null },
+  { name: "Freelance", emoji: "💻", type: "income", is_essential: false, is_active: true, color: null, description: null },
+  { name: "Rendimientos", emoji: "🏦", type: "income", is_essential: false, is_active: true, color: null, description: null },
+  { name: "Inversión", emoji: "💰", type: "income", is_essential: false, is_active: true, color: null, description: null },
+  { name: "Regalo", emoji: "🎁", type: "income", is_essential: false, is_active: true, color: null, description: null },
+  { name: "Reembolso", emoji: "🧾", type: "income", is_essential: false, is_active: true, color: null, description: null },
+  { name: "Venta", emoji: "📦", type: "income", is_essential: false, is_active: true, color: null, description: null },
+  { name: "Otros ingresos", emoji: "➕", type: "income", is_essential: false, is_active: true, color: null, description: null },
+];
+
+export function useRestoreDefaultCategories() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async () => {
+      if (!user) return;
+      const rows = DEFAULT_CATEGORIES.map((c) => ({
+        ...c,
+        user_id: user.id,
+      }));
+      must(await supabase.from("categories").insert(rows as never).select());
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["categories"] }),
   });

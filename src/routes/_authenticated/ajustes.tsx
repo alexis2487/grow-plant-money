@@ -26,6 +26,7 @@ import {
   useBudgets,
   useCategories,
   useProfile,
+  useRestoreDefaultCategories,
   useSaveCategory,
   useTransactions,
   useUpdateProfile,
@@ -154,6 +155,7 @@ function Ajustes() {
 function CategoriesSection({ emojis }: { emojis: string[] }) {
   const { data: categories = [] } = useCategories();
   const save = useSaveCategory();
+  const restore = useRestoreDefaultCategories();
   const [name, setName] = useState("");
   const [emoji, setEmoji] = useState("🌱");
   const [type, setType] = useState<"expense" | "income">("expense");
@@ -167,7 +169,26 @@ function CategoriesSection({ emojis }: { emojis: string[] }) {
             Categorías ({categories.filter((c) => c.is_active).length})
           </AccordionTrigger>
           <AccordionContent className="pt-4">
-            <ul className="space-y-2">
+            {categories.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-border p-4 text-center">
+                <p className="text-sm text-muted-foreground">
+                  No tienes categorías registradas en tu cuenta.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-3"
+                  disabled={restore.isPending}
+                  onClick={async () => {
+                    await restore.mutateAsync();
+                    toast.success("Categorías por defecto restauradas");
+                  }}
+                >
+                  Restaurar categorías iniciales
+                </Button>
+              </div>
+            ) : (
+              <ul className="space-y-2">
               {categories.map((c) => (
                 <li
                   key={c.id}
@@ -201,6 +222,7 @@ function CategoriesSection({ emojis }: { emojis: string[] }) {
                 </li>
               ))}
             </ul>
+            )}
 
             <div className="mt-4 space-y-3 rounded-xl bg-muted/50 p-3">
               <p className="text-sm font-medium">Nueva categoría</p>
