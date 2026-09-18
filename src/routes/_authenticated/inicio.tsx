@@ -1,24 +1,37 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
-import { Plus, Minus, Wallet, CreditCard, ShieldCheck } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Plus, Wallet, CreditCard, ShieldCheck, Target, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HealthCard } from "@/components/HealthCard";
 import { ChallengeCard } from "@/components/ChallengeCard";
 import { EmptyState } from "@/components/EmptyState";
-import { useTransactionSheet } from "./route";
 import {
   useBudgets,
   useCategories,
   useChallenges,
+  useDeleteBudget,
   useMyPlantItems,
   usePlantCatalog,
   useProfile,
+  useSaveBudget,
   useTransactions,
 } from "@/lib/data";
 import { buildInsights, categoryBreakdown, computeHealth, sum } from "@/lib/finance";
-import { formatMoney, greeting, monthLabel, monthRange } from "@/lib/format";
+import { formatMoney, greeting, monthLabel, monthRange, parseAmount } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/inicio")({
   head: () => ({
@@ -40,7 +53,11 @@ function Inicio() {
   const { data: challenges = [] } = useChallenges();
   const { data: catalog = [] } = usePlantCatalog();
   const { data: mine = [] } = useMyPlantItems();
-  const sheet = useTransactionSheet();
+  const saveBudget = useSaveBudget();
+  const deleteBudget = useDeleteBudget();
+  const [goalModalOpen, setGoalModalOpen] = useState(false);
+  const [goalCatId, setGoalCatId] = useState("");
+  const [goalAmount, setGoalAmount] = useState("");
 
   const currency = profile?.base_currency ?? "COP";
   const range = monthRange(0);
@@ -230,21 +247,6 @@ function Inicio() {
         </Tabs>
       </section>
 
-      <div className="grid grid-cols-2 gap-3">
-        <button
-          onClick={() => sheet.open("income")}
-          className="flex min-h-[64px] items-center justify-center gap-2 rounded-2xl bg-secondary text-base font-semibold"
-        >
-          <Plus className="h-5 w-5 text-success" aria-hidden /> Ingreso
-        </button>
-        <button
-          onClick={() => sheet.open("expense")}
-          className="flex min-h-[64px] items-center justify-center gap-2 rounded-2xl bg-primary text-base font-semibold text-primary-foreground"
-        >
-          <Minus className="h-5 w-5" aria-hidden /> Gasto
-        </button>
-      </div>
-
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Reto activo</h2>
@@ -299,10 +301,32 @@ function Inicio() {
         )}
       </section>
 
-      {budgets.length > 0 && (
-        <section className="surface p-5">
-          <h2 className="text-base font-semibold">Presupuestos</h2>
-          <ul className="mt-3 space-y-3">
+      <section className="surface p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="flex items-center gap-2 text-base font-semibold">
+              <Target className="h-4 w-4 text-primary" aria-hidden /> Metas del mes
+            </h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Límites saludables de gasto para mantener tu disciplina financiera
+            </p>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setGoalCatId("");
+              setGoalAmount("");
+              setGoalModalOpen(true);
+            }}
+            className="h-9 shrink-0 gap-1 rounded-xl text-xs font-semibold"
+          >
+            <Plus className="h-3.5 w-3.5" aria-hidden /> Nueva meta
+          </Button>
+        </div>
+
+        {budgets.length > 0 ? (
+          <ul className="mt-4 space-y-3.5">
             {budgets.map((b) => {
               const cat = categories.find((c) => c.id === b.category_id);
               const spent = sum(
@@ -314,27 +338,94 @@ function Inicio() {
                     t.transaction_date <= range.end,
                 ),
               );
-              const pct = Math.round((spent / Number(b.amount)) * 100);
+              const target = Number(b.amount);
+              const pct = Math.round((spent / target) * 100);
+              const remaining = target - spent;
+              const isOver = spent > target;
+              const isWarning = !isOver && pct >= 80;
+
               return (
-                <li key={b.id}>
+                <li
+                  key={b.id}
+                  className="space-y-2 rounded-2xl border border-border/60 bg-secondary/40 p-3.5"
+                >
                   <div className="flex items-center justify-between text-sm">
-                    <span className="truncate">
-                      {cat?.emoji} {cat?.name ?? "Categoría"}
+                    <span className="flex items-center gap-1.5 truncate font-medium">
+                      <span>{cat?.emoji ?? "🎯"}</span>
+                      <span>{cat?.name ?? "Categoría"}</span>
                     </span>
-                    <span className="ml-3 shrink-0 tabular-nums text-muted-foreground">
-                      {formatMoney(spent, currency)} / {formatMoney(Number(b.amount), currency)}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="tabular-nums text-xs text-muted-foreground">
+                        {formatMoney(spent, currency)} / {formatMoney(target, currency)}
+                      </span>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7 rounded-lg text-muted-foreground hover:text-danger"
+                        title="Eliminar meta"
+                        onClick={async () => {
+                          await deleteBudget.mutateAsync(b.id);
+                          toast.success("Meta eliminada");
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden />
+                      </Button>
+                    </div>
                   </div>
-                  <Progress value={Math.min(100, pct)} className="mt-1.5 h-1.5" />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {pct >= 100 ? "Has superado tu presupuesto." : `Has utilizado el ${pct}%.`}
-                  </p>
+                  <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
+                    <div
+                      className={`h-full rounded-full transition-all duration-300 ${
+                        isOver ? "bg-danger" : isWarning ? "bg-warning" : "bg-success"
+                      }`}
+                      style={{ width: `${Math.min(100, pct)}%` }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span
+                      className={
+                        isOver
+                          ? "font-medium text-danger"
+                          : isWarning
+                            ? "font-medium text-warning"
+                            : ""
+                      }
+                    >
+                      {isOver
+                        ? `Superada por ${formatMoney(Math.abs(remaining), currency)}`
+                        : isWarning
+                          ? `Atención: te quedan ${formatMoney(remaining, currency)}`
+                          : `Te quedan ${formatMoney(remaining, currency)} disponibles`}
+                    </span>
+                    <span className="font-medium tabular-nums">{pct}%</span>
+                  </div>
                 </li>
               );
             })}
           </ul>
-        </section>
-      )}
+        ) : (
+          <div className="mt-4 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-6 px-4 text-center">
+            <span className="mb-1.5 text-2xl" aria-hidden>
+              🎯
+            </span>
+            <p className="text-sm font-semibold">Sin metas este mes</p>
+            <p className="mt-0.5 max-w-xs text-xs text-muted-foreground">
+              Establece topes de gasto por categoría para no excederte y ver crecer tu planta.
+            </p>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="mt-3 rounded-xl text-xs font-semibold"
+              onClick={() => {
+                setGoalCatId("");
+                setGoalAmount("");
+                setGoalModalOpen(true);
+              }}
+            >
+              <Plus className="mr-1 h-3.5 w-3.5" /> Crear mi primera meta
+            </Button>
+          </div>
+        )}
+      </section>
 
       <section className="surface p-5">
         <h2 className="text-base font-semibold">Consejos para mejorar tus finanzas</h2>
@@ -393,6 +484,76 @@ function Inicio() {
           />
         )}
       </section>
+
+      <Drawer open={goalModalOpen} onOpenChange={setGoalModalOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Nueva meta mensual</DrawerTitle>
+          </DrawerHeader>
+          <div className="safe-bottom space-y-4 px-4 pb-6">
+            <div>
+              <Label>Categoría de gasto</Label>
+              <Select value={goalCatId} onValueChange={setGoalCatId}>
+                <SelectTrigger className="mt-1 !h-12">
+                  <SelectValue placeholder="Elige la categoría a controlar" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories
+                    .filter((c) => c.type === "expense" && c.is_active)
+                    .map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.emoji} {c.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="gm-amount">Límite mensual máximo</Label>
+              <Input
+                id="gm-amount"
+                inputMode="decimal"
+                value={goalAmount}
+                onChange={(e) => setGoalAmount(e.target.value)}
+                placeholder="Ej. 250000"
+                className="mt-1 h-12"
+              />
+              {parseAmount(goalAmount) > 0 && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Meta: {formatMoney(parseAmount(goalAmount), currency)} al mes
+                </p>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Te avisaremos en tu pantalla de inicio cuando te acerques al 80% o superes el límite establecido.
+            </p>
+            <Button
+              className="h-12 w-full rounded-xl font-semibold"
+              disabled={saveBudget.isPending}
+              onClick={async () => {
+                if (!goalCatId) return toast.error("Elige una categoría para tu meta.");
+                const val = parseAmount(goalAmount);
+                if (val <= 0) return toast.error("Escribe un importe mayor que cero.");
+                try {
+                  await saveBudget.mutateAsync({
+                    category_id: goalCatId,
+                    amount: val,
+                    currency,
+                  });
+                  toast.success("Meta guardada exitosamente 🎯");
+                  setGoalModalOpen(false);
+                  setGoalCatId("");
+                  setGoalAmount("");
+                } catch {
+                  toast.error("No se pudo guardar la meta. Inténtalo de nuevo.");
+                }
+              }}
+            >
+              Guardar meta
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }

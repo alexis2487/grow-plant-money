@@ -1,8 +1,8 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Target, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,9 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   useBudgets,
   useCategories,
-  useDeleteBudget,
   useProfile,
-  useSaveBudget,
   useSaveCategory,
   useTransactions,
   useUpdateProfile,
@@ -269,89 +267,23 @@ function CategoriesSection({ emojis }: { emojis: string[] }) {
 }
 
 function BudgetsSection() {
-  const { data: categories = [] } = useCategories();
   const { data: budgets = [] } = useBudgets();
-  const { data: profile } = useProfile();
-  const save = useSaveBudget();
-  const del = useDeleteBudget();
-  const [categoryId, setCategoryId] = useState("");
-  const [amount, setAmount] = useState("");
-  const currency = profile?.base_currency ?? "COP";
 
   return (
     <section className="surface p-4">
-      <Accordion type="single" collapsible>
-        <AccordionItem value="bud" className="border-0">
-          <AccordionTrigger className="py-0 text-base font-semibold hover:no-underline">
-            Presupuestos mensuales ({budgets.length})
-          </AccordionTrigger>
-          <AccordionContent className="space-y-3 pt-4">
-            <ul className="space-y-2">
-              {budgets.map((b) => {
-                const c = categories.find((x) => x.id === b.category_id);
-                return (
-                  <li
-                    key={b.id}
-                    className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-border p-3"
-                  >
-                    <span className="min-w-0 truncate text-sm">
-                      {c?.emoji} {c?.name ?? "Categoría"} ·{" "}
-                      <strong className="tabular-nums">{formatMoney(Number(b.amount), b.currency)}</strong>
-                    </span>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      aria-label="Eliminar presupuesto"
-                      onClick={() => {
-                        del.mutate(b.id);
-                        toast.success("Presupuesto eliminado");
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" aria-hidden />
-                    </Button>
-                  </li>
-                );
-              })}
-            </ul>
-            <div className="space-y-2 rounded-xl bg-muted/50 p-3">
-              <Select value={categoryId} onValueChange={setCategoryId}>
-                <SelectTrigger className="!h-12">
-                  <SelectValue placeholder="Categoría de gasto" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories
-                    .filter((c) => c.type === "expense" && c.is_active)
-                    .map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.emoji} {c.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-              <Input
-                inputMode="decimal"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="Importe mensual"
-                className="h-12"
-              />
-              <Button
-                className="h-12 w-full rounded-xl"
-                onClick={async () => {
-                  const value = parseAmount(amount);
-                  if (!categoryId) return toast.error("Elige una categoría.");
-                  if (value <= 0) return toast.error("Escribe un importe válido.");
-                  await save.mutateAsync({ category_id: categoryId, amount: value, currency });
-                  setAmount("");
-                  toast.success("Presupuesto guardado");
-                }}
-              >
-                Guardar presupuesto
-              </Button>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="flex items-center gap-2 text-base font-semibold">
+            <Target className="h-4 w-4 text-primary" aria-hidden /> Metas mensuales ({budgets.length})
+          </h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Las metas de gasto ahora se gestionan y visualizan en tiempo real directamente desde tu pantalla de Inicio.
+          </p>
+        </div>
+        <Button asChild variant="secondary" className="h-10 shrink-0 rounded-xl">
+          <Link to="/inicio">Ir a Metas en Inicio</Link>
+        </Button>
+      </div>
     </section>
   );
 }
