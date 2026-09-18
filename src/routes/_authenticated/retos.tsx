@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Sparkles, Check, Lock, RotateCcw, ShieldCheck, User } from "lucide-react";
+import { Sparkles, Check, Lock, RotateCcw, ShieldCheck, User, Eye, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -55,6 +55,127 @@ const RARITY_INFO = {
   epic: { label: "Épico", border: "border-purple-500/40", badgeBg: "bg-purple-500/10 text-purple-500 dark:text-purple-400" },
   legendary: { label: "Legendario", border: "border-amber-500/50", badgeBg: "bg-amber-500/15 text-amber-500 dark:text-amber-400 font-semibold" },
 } as const;
+
+/** Mini-renderizador visual de cada elemento en la tienda de colección */
+function ItemVisualPreview({ item }: { item: PlantItem }) {
+  if (item.item_type === "background") {
+    const bgStyles: Record<string, { gradient: string; decor: React.ReactNode }> = {
+      bg_room: {
+        gradient: "from-slate-100 via-slate-200 to-slate-300",
+        decor: (
+          <div className="flex items-center gap-1.5 rounded-md bg-white/75 px-2 py-0.5 text-[11px] font-medium text-slate-700 shadow-xs backdrop-blur-xs">
+            <span>🪟</span> Habitación con luz de ventana
+          </div>
+        ),
+      },
+      bg_garden: {
+        gradient: "from-emerald-200 via-teal-200 to-emerald-400",
+        decor: (
+          <div className="flex items-center gap-1.5 rounded-md bg-emerald-950/25 px-2 py-0.5 text-[11px] font-medium text-white shadow-xs backdrop-blur-xs">
+            <span>🌿</span> Jardín Tropical Exuberante
+          </div>
+        ),
+      },
+      bg_sunrise: {
+        gradient: "from-amber-200 via-pink-200 to-purple-400",
+        decor: (
+          <div className="flex items-center gap-1.5 rounded-md bg-white/50 px-2 py-0.5 text-[11px] font-medium text-amber-950 shadow-xs backdrop-blur-xs">
+            <span>🌅</span> Amanecer Dorado & Rosa
+          </div>
+        ),
+      },
+      bg_greenhouse: {
+        gradient: "from-sky-200 via-cyan-200 to-blue-400",
+        decor: (
+          <div className="flex items-center gap-1.5 rounded-md bg-sky-950/25 px-2 py-0.5 text-[11px] font-medium text-white shadow-xs backdrop-blur-xs">
+            <span>🏛️</span> Invernadero de Cristal
+          </div>
+        ),
+      },
+      bg_zen: {
+        gradient: "from-amber-100 via-orange-200 to-amber-300",
+        decor: (
+          <div className="flex items-center gap-1.5 rounded-md bg-amber-950/25 px-2 py-0.5 text-[11px] font-medium text-white shadow-xs backdrop-blur-xs">
+            <span>🧘</span> Jardín Zen Atardecer
+          </div>
+        ),
+      },
+      bg_night: {
+        gradient: "from-slate-900 via-indigo-950 to-purple-950",
+        decor: (
+          <div className="flex items-center gap-1.5 rounded-md bg-white/20 px-2 py-0.5 text-[11px] font-medium text-amber-200 shadow-xs backdrop-blur-xs">
+            <span>🌙</span> Noche Cósmica & Estrellas
+          </div>
+        ),
+      },
+    };
+
+    const c = bgStyles[item.code] ?? {
+      gradient: "from-slate-100 to-slate-200",
+      decor: <span>{item.name}</span>,
+    };
+
+    return (
+      <div className={`relative mb-3 flex h-14 w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br ${c.gradient} shadow-xs border border-border/40`}>
+        {c.decor}
+      </div>
+    );
+  }
+
+  if (item.item_type === "pot") {
+    const potIcons: Record<string, { icon: string; label: string; bg: string }> = {
+      pot_ceramic: { icon: "🏺", label: "Cerámica Terracota", bg: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30" },
+      pot_wood: { icon: "🪵", label: "Roble Rústico", bg: "bg-stone-500/15 text-stone-700 dark:text-stone-300 border-stone-500/30" },
+      pot_minimal: { icon: "🥛", label: "Porcelana Blanca", bg: "bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-300/40" },
+      pot_metal: { icon: "🏆", label: "Oro Pulido", bg: "bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 border-yellow-500/40" },
+      pot_crystal: { icon: "💎", label: "Terrario Cristal", bg: "bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border-cyan-500/40" },
+      pot_cyber: { icon: "⚡", label: "Cyberpunk Neón", bg: "bg-fuchsia-950 text-cyan-300 border-cyan-500/60" },
+    };
+    const p = potIcons[item.code] ?? { icon: "🏺", label: item.name, bg: "bg-secondary border-border" };
+    return (
+      <div className={`relative mb-3 flex h-14 w-full items-center justify-center gap-2 rounded-xl border ${p.bg} shadow-xs text-sm font-medium`}>
+        <span className="text-xl">{p.icon}</span>
+        <span className="text-xs">{p.label}</span>
+      </div>
+    );
+  }
+
+  if (item.item_type === "plant") {
+    const plantIcons: Record<string, { icon: string; bg: string }> = {
+      plant_classic: { icon: "🌿", bg: "bg-emerald-500/15 text-emerald-600 border-emerald-500/30" },
+      plant_cactus: { icon: "🌵", bg: "bg-green-500/15 text-green-600 border-green-500/30" },
+      plant_succulent: { icon: "🌸", bg: "bg-pink-500/15 text-pink-500 border-pink-500/30" },
+      plant_monstera: { icon: "🌱", bg: "bg-teal-500/15 text-teal-600 border-teal-500/30" },
+      plant_bonsai: { icon: "🪴", bg: "bg-amber-500/15 text-amber-700 border-amber-500/30" },
+      plant_bamboo: { icon: "🎋", bg: "bg-lime-500/15 text-lime-600 border-lime-500/30" },
+      plant_tree: { icon: "🌳", bg: "bg-yellow-500/20 text-yellow-600 border-yellow-500/30" },
+      plant_carnivorous: { icon: "🌺", bg: "bg-rose-500/20 text-rose-600 border-rose-500/30" },
+    };
+    const pl = plantIcons[item.code] ?? { icon: "🌱", bg: "bg-secondary border-border" };
+    return (
+      <div className={`relative mb-3 flex h-14 w-full items-center justify-center gap-2 rounded-xl border ${pl.bg} shadow-xs text-sm font-medium`}>
+        <span className="text-2xl">{pl.icon}</span>
+      </div>
+    );
+  }
+
+  // Effect
+  const fxIcons: Record<string, { icon: string; label: string; bg: string }> = {
+    fx_none: { icon: "⚪", label: "Sin efecto", bg: "bg-secondary/70 border-border/50 text-muted-foreground" },
+    fx_leaves: { icon: "🍃", label: "Hojas flotantes", bg: "bg-emerald-500/15 text-emerald-600 border-emerald-500/30" },
+    fx_petals: { icon: "🌸", label: "Pétalos Sakura", bg: "bg-pink-500/15 text-pink-600 border-pink-500/30" },
+    fx_fireflies: { icon: "💡", label: "Luciérnagas vivas", bg: "bg-yellow-500/15 text-yellow-600 border-yellow-500/30" },
+    fx_aura: { icon: "🌀", label: "Aura de prosperidad", bg: "bg-cyan-500/15 text-cyan-600 border-cyan-500/30" },
+    fx_particles: { icon: "✨", label: "Polvo de oro", bg: "bg-amber-500/20 text-amber-600 border-amber-500/40" },
+  };
+  const fx = fxIcons[item.code] ?? { icon: "✨", label: item.name, bg: "bg-secondary border-border" };
+  return (
+    <div className={`relative mb-3 flex h-14 w-full items-center justify-center gap-2 rounded-xl border ${fx.bg} shadow-xs text-xs font-semibold`}>
+      <span className="text-xl">{fx.icon}</span>
+      <span>{fx.label}</span>
+    </div>
+  );
+}
 
 function Retos() {
   const { data: profile } = useProfile();
@@ -327,12 +448,53 @@ function Retos() {
             <div className="my-2">
               <FinancialPlant
                 score={95}
-                size={175}
+                size={180}
                 plantStyle={currentDisplayCodes.plant}
                 potStyle={currentDisplayCodes.pot}
+                background={currentDisplayCodes.background}
                 backgroundStyle={currentDisplayCodes.background}
                 effect={currentDisplayCodes.effect}
               />
+            </div>
+
+            {/* RESUMEN DE ELEMENTOS ACTIVOS / EN VISTA PREVIA */}
+            <div className="mt-2 mb-1 flex flex-wrap items-center justify-center gap-1.5 text-[11px]">
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-medium border transition-colors ${
+                  previewItem?.item_type === "plant"
+                    ? "border-primary bg-primary/15 text-primary font-semibold ring-1 ring-primary/40"
+                    : "border-border/60 bg-muted/40 text-muted-foreground"
+                }`}
+              >
+                🌿 {catalog.find((c) => c.code === currentDisplayCodes.plant)?.name ?? "Planta"}
+              </span>
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-medium border transition-colors ${
+                  previewItem?.item_type === "pot"
+                    ? "border-primary bg-primary/15 text-primary font-semibold ring-1 ring-primary/40"
+                    : "border-border/60 bg-muted/40 text-muted-foreground"
+                }`}
+              >
+                🏺 {catalog.find((c) => c.code === currentDisplayCodes.pot)?.name ?? "Maceta"}
+              </span>
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-medium border transition-colors ${
+                  previewItem?.item_type === "background"
+                    ? "border-primary bg-primary/15 text-primary font-semibold ring-1 ring-primary/40"
+                    : "border-border/60 bg-muted/40 text-muted-foreground"
+                }`}
+              >
+                🖼️ {catalog.find((c) => c.code === currentDisplayCodes.background)?.name ?? "Fondo"}
+              </span>
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-medium border transition-colors ${
+                  previewItem?.item_type === "effect"
+                    ? "border-primary bg-primary/15 text-primary font-semibold ring-1 ring-primary/40"
+                    : "border-border/60 bg-muted/40 text-muted-foreground"
+                }`}
+              >
+                ✨ {catalog.find((c) => c.code === currentDisplayCodes.effect)?.name ?? "Efecto"}
+              </span>
             </div>
 
             {/* BARRA DE ACCIONES DE LA VISTA PREVIA */}
@@ -436,7 +598,7 @@ function Retos() {
                           onClick={() => handleSelectPreview(item)}
                           className={`relative cursor-pointer rounded-2xl border p-4 transition-all hover:shadow-md ${
                             isPreviewing
-                              ? "border-primary bg-primary/5 shadow-sm ring-1 ring-primary/40"
+                              ? "border-primary bg-primary/5 shadow-sm ring-2 ring-primary/50"
                               : isEquipped
                                 ? "border-success/50 bg-success/5"
                                 : owned
@@ -462,8 +624,13 @@ function Retos() {
                             )}
                           </div>
 
+                          {/* Miniatura visual del elemento */}
+                          <div className="mt-3">
+                            <ItemVisualPreview item={item} />
+                          </div>
+
                           {/* Título y Descripción */}
-                          <div className="mt-2.5">
+                          <div className="mt-1">
                             <h3 className="font-semibold text-foreground leading-snug">
                               {item.name}
                             </h3>
@@ -492,7 +659,17 @@ function Retos() {
                               )}
                             </div>
 
-                            <div onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                              <Button
+                                size="sm"
+                                variant={isPreviewing ? "default" : "outline"}
+                                className="h-8 rounded-lg text-xs px-2.5"
+                                onClick={() => handleSelectPreview(item)}
+                              >
+                                <Eye className="mr-1 h-3.5 w-3.5" />
+                                {isPreviewing ? "Viendo" : "Ver"}
+                              </Button>
+
                               {owned ? (
                                 isEquipped ? (
                                   <Badge variant="secondary" className="text-[11px]">

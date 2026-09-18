@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { cn } from "@/lib/utils";
 import { healthState } from "@/lib/finance";
 
@@ -9,6 +10,7 @@ interface Props {
   effect?: string;
   plantStyle?: string;
   background?: string;
+  backgroundStyle?: string;
 }
 
 /**
@@ -22,8 +24,10 @@ export function FinancialPlant({
   potStyle = "pot_ceramic",
   effect = "fx_none",
   plantStyle = "plant_classic",
-  background = "bg_room",
+  background: bgProp,
+  backgroundStyle,
 }: Props) {
+  const background = backgroundStyle ?? bgProp ?? "bg_room";
   const state = healthState(score);
   const growth = Math.max(0.2, Math.min(1, score / 100));
   const stemHeight = 35 + growth * 75;
@@ -39,8 +43,9 @@ export function FinancialPlant({
     critical: "#ef4444",
   }[state];
 
-  // Identificadores únicos para no colisionar gradientes si hay múltiples plantas en pantalla
-  const uid = `fp-${Math.random().toString(36).slice(2, 7)}`;
+  // Identificadores únicos y estables para no colisionar gradientes SVG entre múltiples plantas
+  const baseId = useId();
+  const uid = `fp-${baseId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
   return (
     <div

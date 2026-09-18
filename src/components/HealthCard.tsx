@@ -44,6 +44,7 @@ export function HealthCard({
           size={124}
           plantStyle={plantStyle}
           potStyle={potStyle}
+          background={backgroundStyle}
           backgroundStyle={backgroundStyle}
           effect={effect}
           className="shrink-0"
