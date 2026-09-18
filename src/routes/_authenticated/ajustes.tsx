@@ -481,22 +481,12 @@ function DataSection() {
   async function exportBackup() {
     const json = exportLocalBackupJson();
     const fileName = `plantwallet_backup_${new Date().toISOString().slice(0, 10)}.json`;
-    const shared = await shareFileNative(
+    await shareFileNative(
       fileName,
       json,
       "Copia de seguridad PlantWallet",
       "Respaldo seguro de finanzas personales en PlantWallet 🌱"
     );
-    if (!shared) {
-      const blob = new Blob([json], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = fileName;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast.success("Copia de seguridad descargada en tu dispositivo 📦");
-    }
   }
 
   function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -532,21 +522,12 @@ function DataSection() {
     ];
     const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(";")).join("\n");
     const fileName = `plantwallet_movimientos_${new Date().toISOString().slice(0, 10)}.csv`;
-    const shared = await shareFileNative(
+    await shareFileNative(
       fileName,
       `\uFEFF${csv}`,
       "Movimientos PlantWallet",
       "Reporte de transacciones de PlantWallet 🌱"
     );
-    if (!shared) {
-      const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" }));
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = fileName;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast.success("Reporte CSV descargado en tu dispositivo 📄");
-    }
   }
 
   return (

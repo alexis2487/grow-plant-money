@@ -91,22 +91,12 @@ function Movimientos() {
       .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(";"))
       .join("\n");
     const fileName = `plantwallet-movimientos-${new Date().toISOString().slice(0, 10)}.csv`;
-    const shared = await shareFileNative(
+    await shareFileNative(
       fileName,
       csv,
       "Reporte de Movimientos PlantWallet",
       "Exportación de movimientos en formato CSV 🌱"
     );
-    if (!shared) {
-      const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = fileName;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast.success("Reporte CSV descargado en tu dispositivo 📄");
-    }
   }
 
   return (

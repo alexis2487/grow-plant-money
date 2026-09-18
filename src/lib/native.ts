@@ -70,7 +70,22 @@ export async function shareFileNative(
   title: string,
   text: string
 ): Promise<boolean> {
-  if (!Capacitor.isNativePlatform()) return false;
+  if (!Capacitor.isNativePlatform()) {
+    try {
+      const isJson = filename.endsWith(".json");
+      const blob = new Blob([content], { type: isJson ? "application/json" : "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // Silencioso
+    }
+    return true;
+  }
+
   try {
     const fileResult = await Filesystem.writeFile({
       path: filename,
@@ -86,8 +101,8 @@ export async function shareFileNative(
       dialogTitle: title,
     });
     return true;
-  } catch (err) {
-    console.warn("Error en compartir nativo:", err);
+  } catch {
+    // Si el usuario cancela o pulsa atrás en la hoja de compartir nativa, salir en silencio
     return false;
   }
 }
