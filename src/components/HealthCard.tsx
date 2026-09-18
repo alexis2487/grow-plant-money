@@ -15,11 +15,13 @@ export function HealthCard({
   health,
   plantStyle,
   potStyle,
+  backgroundStyle,
   effect,
 }: {
   health: HealthResult;
   plantStyle?: string;
   potStyle?: string;
+  backgroundStyle?: string;
   effect?: string;
 }) {
   const s = STATE_STYLES[health.state];
@@ -42,6 +44,7 @@ export function HealthCard({
           size={124}
           plantStyle={plantStyle}
           potStyle={potStyle}
+          backgroundStyle={backgroundStyle}
           effect={effect}
           className="shrink-0"
         />

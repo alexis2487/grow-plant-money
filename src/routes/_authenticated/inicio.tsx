@@ -109,6 +109,7 @@ function Inicio() {
         health={health}
         plantStyle={equipped.plant}
         potStyle={equipped.pot}
+        backgroundStyle={equipped.background}
         effect={equipped.effect}
       />
 

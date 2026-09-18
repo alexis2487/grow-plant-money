@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./auth";
 import type { Budget, Category, PlantItem, Profile, Transaction, UserChallenge, UserPlantItem } from "./types";
+import { FULL_CATALOG } from "./catalog";
 
 function must<T>(res: { data: T | null; error: { message: string } | null }): T {
   if (res.error) throw new Error(res.error.message);
@@ -25,7 +26,11 @@ export function useCategories() {
     enabled: !!user,
     queryFn: async () =>
       must(
-        await supabase.from("categories").select("*").eq("user_id", user!.id).order("name"),
+        await supabase
+          .from("categories")
+          .select("*")
+          .eq("user_id", user!.id)
+          .order("sort_order", { ascending: true }),
       ) as Category[],
   });
 }
@@ -41,9 +46,7 @@ export function useTransactions() {
           .from("transactions")
           .select("*")
           .eq("user_id", user!.id)
-          .order("transaction_date", { ascending: false })
-          .order("created_at", { ascending: false })
-          .limit(2000),
+          .order("transaction_date", { ascending: false }),
       ) as Transaction[],
   });
 }
@@ -77,10 +80,26 @@ export function useChallenges() {
 export function usePlantCatalog() {
   return useQuery({
     queryKey: ["plant_items"],
-    queryFn: async () =>
-      must(
-        await supabase.from("plant_items").select("*").order("unlock_points"),
-      ) as PlantItem[],
+    queryFn: async () => {
+      try {
+        const { data } = await supabase.from("plant_items").select("*").order("unlock_points");
+        const dbItems = (data ?? []) as PlantItem[];
+        const dbByCode = new Map(dbItems.map((item) => [item.code, item]));
+
+        return FULL_CATALOG.map((local) => {
+          const fromDb = dbByCode.get(local.code);
+          if (fromDb) {
+            return {
+              ...local,
+              id: fromDb.id,
+            };
+          }
+          return local;
+        });
+      } catch {
+        return FULL_CATALOG;
+      }
+    },
   });
 }
 
@@ -213,17 +232,69 @@ export function useEquipItem() {
   const qc = useQueryClient();
   const { user } = useAuth();
   return useMutation({
-    mutationFn: async ({ id, itemIds }: { id: string; itemIds: string[] }) => {
-      if (itemIds.length)
-        must(
-          await supabase
-            .from("user_plant_items")
-            .update({ equipped: false })
-            .eq("user_id", user!.id)
-            .in("plant_item_id", itemIds)
-            .select(),
-        );
-      must(await supabase.from("user_plant_items").update({ equipped: true }).eq("id", id).select());
+    mutationFn: async ({
+      id,
+      plantItemId,
+      itemIds,
+    }: {
+      id?: string;
+      plantItemId?: string;
+      itemIds: string[];
+    }) => {
+      if (!user) return;
+      if (itemIds.length) {
+        await supabase
+          .from("user_plant_items")
+          .update({ equipped: false })
+          .eq("user_id", user.id)
+          .in("plant_item_id", itemIds);
+      }
+      if (id) {
+        must(await supabase.from("user_plant_items").update({ equipped: true }).eq("id", id).select());
+      } else if (plantItemId) {
+        const { data: existing } = await supabase
+          .from("user_plant_items")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("plant_item_id", plantItemId)
+          .maybeSingle();
+
+        if (existing) {
+          must(await supabase.from("user_plant_items").update({ equipped: true }).eq("id", existing.id).select());
+        } else {
+          must(
+            await supabase
+              .from("user_plant_items")
+              .insert({
+                user_id: user.id,
+                plant_item_id: plantItemId,
+                equipped: true,
+              } as never)
+              .select(),
+          );
+        }
+      }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["user_plant_items"] }),
+  });
+}
+
+export function useUnlockItem() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async ({ plantItemId }: { plantItemId: string }) => {
+      if (!user) return;
+      must(
+        await supabase
+          .from("user_plant_items")
+          .insert({
+            user_id: user.id,
+            plant_item_id: plantItemId,
+            equipped: false,
+          } as never)
+          .select(),
+      );
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["user_plant_items"] }),
   });

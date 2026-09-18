@@ -216,6 +216,55 @@
   animation: pw-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+@keyframes pw-pulse-glow {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes pw-float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(2deg);
+  }
+}
+
+@keyframes pw-sparkle {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@utility animate-pulse-glow {
+  transform-origin: center center;
+  animation: pw-pulse-glow 3.5s ease-in-out infinite;
+}
+
+@utility animate-float {
+  transform-origin: center center;
+  animation: pw-float 4.5s ease-in-out infinite;
+}
+
+@utility animate-sparkle {
+  transform-origin: center center;
+  animation: pw-sparkle 2.2s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
