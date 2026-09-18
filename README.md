@@ -3045,17 +3045,9 @@ Cuando exista una decisión de diseño no especificada, elegir la opción que pr
 
 No sacrificar funcionalidad por estética y no sacrificar simplicidad por agregar funciones innecesarias.
 
-This project was built with [Lovable](https://lovable.dev).
+## PlantWallet — Cultiva mejor tus finanzas
 
-**Live app**: https://grow-plant-money.lovable.app
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/ec1e68b5-cd8f-4d5e-8528-ae7dcc409457).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+Aplicación financiera personal interactiva, gamificada y 100% offline con gestión de débito, crédito y salud financiera viva.
 
 ## Development
 

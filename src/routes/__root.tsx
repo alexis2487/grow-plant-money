@@ -10,7 +10,6 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "../lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
@@ -40,9 +39,6 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -143,6 +139,48 @@ function RootComponent() {
     });
     return () => data.subscription.unsubscribe();
   }, [router, queryClient]);
+
+  // Suprime activamente del DOM cualquier marca de agua inyectada en tiempo de ejecución
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const purgeWatermarks = () => {
+      const selectors = [
+        "#lovable-badge",
+        "[id*='lovable-badge']",
+        "[class*='lovable-badge']",
+        "[id*='lovable']",
+        "[class*='lovable']",
+        "a[href*='lovable.dev']",
+        "a[href*='lovable.app']",
+        "iframe[src*='lovable']",
+        ".lovable-badge",
+        "#lovable-watermark",
+        "[data-lovable-badge]",
+        "[data-lovable-watermark]",
+      ];
+      selectors.forEach((sel) => {
+        try {
+          document.querySelectorAll(sel).forEach((el) => {
+            el.remove();
+          });
+        } catch {
+          // Ignorar selectores no válidos
+        }
+      });
+    };
+
+    purgeWatermarks();
+    const observer = new MutationObserver(() => {
+      purgeWatermarks();
+    });
+    observer.observe(document.body || document.documentElement, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
