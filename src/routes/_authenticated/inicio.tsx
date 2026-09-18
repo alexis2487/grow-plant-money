@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, Wallet, CreditCard, ShieldCheck } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HealthCard } from "@/components/HealthCard";
 import { ChallengeCard } from "@/components/ChallengeCard";
 import { EmptyState } from "@/components/EmptyState";
@@ -95,29 +96,138 @@ function Inicio() {
       />
 
       <section className="surface p-5">
-        <p className="text-sm text-muted-foreground">Balance del mes</p>
-        <p className="mt-1 text-3xl font-bold tabular-nums">
-          {formatMoney(health.current.balance, currency)}
-        </p>
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="rounded-2xl bg-secondary p-3">
-            <p className="text-xs text-muted-foreground">Ingresos</p>
-            <p className="mt-0.5 text-lg font-semibold tabular-nums text-success">
-              {formatMoney(health.current.income, currency)}
-            </p>
+        <Tabs defaultValue="debit" className="w-full">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Balance del mes
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Débito y crédito separados para una salud financiera real
+              </p>
+            </div>
+            <TabsList className="grid h-12 w-full grid-cols-2 rounded-2xl bg-secondary p-1 sm:w-64">
+              <TabsTrigger
+                value="debit"
+                className="flex flex-col items-center justify-center rounded-xl py-1 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+              >
+                <span className="flex items-center gap-1">
+                  <Wallet className="h-3 w-3 text-success" aria-hidden /> Débito
+                </span>
+                <span className="text-[11px] font-normal tabular-nums text-muted-foreground">
+                  {formatMoney(health.current.debit.balance, currency)}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="credit"
+                className="flex flex-col items-center justify-center rounded-xl py-1 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+              >
+                <span className="flex items-center gap-1">
+                  <CreditCard className="h-3 w-3 text-warning" aria-hidden /> Crédito
+                </span>
+                <span className="text-[11px] font-normal tabular-nums text-muted-foreground">
+                  {formatMoney(health.current.credit.expense, currency)}
+                </span>
+              </TabsTrigger>
+            </TabsList>
           </div>
-          <div className="rounded-2xl bg-secondary p-3">
-            <p className="text-xs text-muted-foreground">Gastos</p>
-            <p className="mt-0.5 text-lg font-semibold tabular-nums">
-              {formatMoney(health.current.expense, currency)}
+
+          {/* BALANCE DÉBITO */}
+          <TabsContent value="debit" className="mt-4 space-y-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <div>
+                <span className="text-sm font-medium text-muted-foreground">Balance del mes (Débito)</span>
+                <p
+                  className={`mt-1 text-3xl font-bold tabular-nums ${
+                    health.current.debit.balance < 0 ? "text-danger" : ""
+                  }`}
+                >
+                  {formatMoney(health.current.debit.balance, currency)}
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-success/15 px-2.5 py-1 text-xs font-semibold text-success">
+                <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden />
+                Dinero disponible
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-2xl bg-secondary p-3">
+                <p className="text-xs text-muted-foreground">Ingresos</p>
+                <p className="mt-0.5 text-lg font-semibold tabular-nums text-success">
+                  {formatMoney(health.current.debit.income, currency)}
+                </p>
+              </div>
+              <div className="rounded-2xl bg-secondary p-3">
+                <p className="text-xs text-muted-foreground">Gastos en débito</p>
+                <p className="mt-0.5 text-lg font-semibold tabular-nums">
+                  {formatMoney(health.current.debit.expense, currency)}
+                </p>
+              </div>
+            </div>
+
+            <p className="text-sm text-muted-foreground">
+              {health.current.debit.income > 0
+                ? `Has gastado el ${Math.round(
+                    (health.current.debit.expense / health.current.debit.income) * 100,
+                  )}% de tus ingresos este mes.`
+                : "Registra tus ingresos para ver la relación con tus gastos en débito."}
             </p>
-          </div>
-        </div>
-        <p className="mt-3 text-sm text-muted-foreground">
-          {health.current.income > 0
-            ? `Has gastado el ${Math.round((health.current.expense / health.current.income) * 100)}% de tus ingresos este mes.`
-            : "Registra tus ingresos para ver la relación con tus gastos."}
-        </p>
+
+            <div className="flex items-start gap-2.5 rounded-xl border border-success/20 bg-success/5 p-3 text-xs text-muted-foreground">
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden />
+              <span>
+                <strong>Salud protegida:</strong> Las compras con tarjeta de crédito no se restan de tu saldo en débito, preservando la exactitud de tu dinero líquido y tu salud financiera.
+              </span>
+            </div>
+          </TabsContent>
+
+          {/* BALANCE CRÉDITO */}
+          <TabsContent value="credit" className="mt-4 space-y-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <div>
+                <span className="text-sm font-medium text-muted-foreground">Balance del mes (Crédito)</span>
+                <p className="mt-1 text-3xl font-bold tabular-nums">
+                  {formatMoney(health.current.credit.expense, currency)}
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/15 px-2.5 py-1 text-xs font-semibold text-warning">
+                <span className="h-1.5 w-1.5 rounded-full bg-warning" aria-hidden />
+                Tarjeta de crédito
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-2xl bg-secondary p-3">
+                <p className="text-xs text-muted-foreground">Consumos del mes</p>
+                <p className="mt-0.5 text-lg font-semibold tabular-nums text-warning">
+                  {formatMoney(health.current.credit.expense, currency)}
+                </p>
+              </div>
+              <div className="rounded-2xl bg-secondary p-3">
+                <p className="text-xs text-muted-foreground">Abonos / Reembolsos</p>
+                <p className="mt-0.5 text-lg font-semibold tabular-nums text-success">
+                  {formatMoney(health.current.credit.income, currency)}
+                </p>
+              </div>
+            </div>
+
+            <p className="text-sm text-muted-foreground">
+              {health.current.credit.count > 0
+                ? `Tienes ${health.current.credit.count} compra${
+                    health.current.credit.count > 1 ? "s" : ""
+                  } a crédito este mes por un total de ${formatMoney(health.current.credit.expense, currency)}.`
+                : "No tienes compras a crédito registradas este mes."}
+            </p>
+
+            <div className="flex items-start gap-2.5 rounded-xl border border-warning/20 bg-warning/5 p-3 text-xs text-muted-foreground">
+              <CreditCard className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
+              <span>
+                <strong>Gestión independiente:</strong> El crédito se registra por separado y no reduce tu dinero real en débito, evitando falsas alertas en tu salud financiera.
+              </span>
+            </div>
+          </TabsContent>
+        </Tabs>
       </section>
 
       <div className="grid grid-cols-2 gap-3">

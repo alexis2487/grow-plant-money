@@ -191,6 +191,21 @@ export function TransactionSheet({ open, onOpenChange, type, editing }: Props) {
                 </SelectContent>
               </Select>
             </div>
+            <div>
+              <Label className="text-sm text-muted-foreground">Método de pago</Label>
+              <Select value={method} onValueChange={setMethod}>
+                <SelectTrigger className="mt-1 !h-12">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAYMENT_METHODS.map((m) => (
+                    <SelectItem key={m.value} value={m.value}>
+                      {m.label} {m.value === "credit" ? "(Crédito)" : "(Débito)"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {!more ? (
@@ -210,21 +225,6 @@ export function TransactionSheet({ open, onOpenChange, type, editing }: Props) {
                   maxLength={120}
                   className="mt-1 h-12"
                 />
-              </div>
-              <div>
-                <Label className="text-sm text-muted-foreground">Método de pago</Label>
-                <Select value={method} onValueChange={setMethod}>
-                  <SelectTrigger className="mt-1 !h-12">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PAYMENT_METHODS.map((m) => (
-                      <SelectItem key={m.value} value={m.value}>
-                        {m.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
               <div>
                 <Label htmlFor="pw-notes" className="text-sm text-muted-foreground">

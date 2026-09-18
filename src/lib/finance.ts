@@ -1,7 +1,7 @@
 import type { Budget, Category, Transaction } from "./types";
 import { monthRange } from "./format";
 
-export interface PeriodTotals {
+export interface AccountTotals {
   income: number;
   expense: number;
   balance: number;
@@ -9,17 +9,62 @@ export interface PeriodTotals {
   count: number;
 }
 
+export interface CreditTotals {
+  income: number;
+  expense: number;
+  balance: number;
+  count: number;
+}
+
+export interface PeriodTotals {
+  income: number;
+  expense: number;
+  balance: number;
+  totalExpense: number;
+  savingsRate: number;
+  count: number;
+  debit: AccountTotals;
+  credit: CreditTotals;
+}
+
+export function isCreditTx(t: { payment_method?: string | null }): boolean {
+  return t.payment_method === "credit";
+}
+
 export function totalsFor(txs: Transaction[], start: string, end: string): PeriodTotals {
   const inRange = txs.filter((t) => t.transaction_date >= start && t.transaction_date <= end);
-  const income = sum(inRange.filter((t) => t.type === "income"));
-  const expense = sum(inRange.filter((t) => t.type === "expense"));
-  const balance = income - expense;
+  const debitTxs = inRange.filter((t) => !isCreditTx(t));
+  const creditTxs = inRange.filter((t) => isCreditTx(t));
+
+  const debitIncome = sum(debitTxs.filter((t) => t.type === "income"));
+  const debitExpense = sum(debitTxs.filter((t) => t.type === "expense"));
+  const debitBalance = debitIncome - debitExpense;
+  const debitSavingsRate = debitIncome > 0 ? Math.max(0, debitBalance / debitIncome) : 0;
+
+  const creditIncome = sum(creditTxs.filter((t) => t.type === "income"));
+  const creditExpense = sum(creditTxs.filter((t) => t.type === "expense"));
+  const creditBalance = creditExpense - creditIncome;
+
   return {
-    income,
-    expense,
-    balance,
-    savingsRate: income > 0 ? balance / income : 0,
+    income: debitIncome,
+    expense: debitExpense,
+    balance: debitBalance,
+    totalExpense: debitExpense + creditExpense,
+    savingsRate: debitSavingsRate,
     count: inRange.length,
+    debit: {
+      income: debitIncome,
+      expense: debitExpense,
+      balance: debitBalance,
+      savingsRate: debitSavingsRate,
+      count: debitTxs.length,
+    },
+    credit: {
+      income: creditIncome,
+      expense: creditExpense,
+      balance: creditBalance,
+      count: creditTxs.length,
+    },
   };
 }
 
@@ -56,12 +101,12 @@ export function computeHealth(
   const previous = totalsFor(txs, prev.start, prev.end);
   const reasons: string[] = [];
 
-  // 1. Capacidad de ahorro
-  const rate = current.savingsRate;
+  // 1. Capacidad de ahorro (basada en el flujo real de débito / liquidez)
+  const rate = current.debit.savingsRate;
   const savings = clamp(rate / 0.2, 0, 1) * HEALTH_WEIGHTS.savingsCapacity;
 
-  // 2. Relación ingresos / gastos
-  const ratio = current.income > 0 ? current.expense / current.income : current.expense > 0 ? 2 : 0;
+  // 2. Relación ingresos / gastos (débito: el crédito no resta del débito para no falsear liquidez)
+  const ratio = current.debit.income > 0 ? current.debit.expense / current.debit.income : current.debit.expense > 0 ? 2 : 0;
   const ratioScore = clamp(1 - (ratio - 0.5) / 0.7, 0, 1) * HEALTH_WEIGHTS.incomeExpenseRatio;
 
   // 3. Cumplimiento de presupuestos
@@ -86,22 +131,22 @@ export function computeHealth(
     }
   }
 
-  // 4. Tendencia
+  // 4. Tendencia (basada en gastos de débito para reflejar el comportamiento recurrente)
   let trendScore = HEALTH_WEIGHTS.trend * 0.6;
-  if (previous.expense > 0) {
-    const delta = (current.expense - previous.expense) / previous.expense;
+  if (previous.debit.expense > 0) {
+    const delta = (current.debit.expense - previous.debit.expense) / previous.debit.expense;
     trendScore = clamp(0.6 - delta * 2, 0, 1) * HEALTH_WEIGHTS.trend;
     if (delta > 0.1) {
-      reasons.push(`Tus gastos subieron ${Math.round(delta * 100)}% frente al mes anterior.`);
+      reasons.push(`Tus gastos en débito subieron ${Math.round(delta * 100)}% frente al mes anterior.`);
     } else if (delta < -0.05) {
-      reasons.push(`Tus gastos bajaron ${Math.abs(Math.round(delta * 100))}% frente al mes anterior.`);
+      reasons.push(`Tus gastos en débito bajaron ${Math.abs(Math.round(delta * 100))}% frente al mes anterior.`);
     }
   }
 
-  // 5. Estabilidad (variabilidad de los últimos 3 meses)
+  // 5. Estabilidad (variabilidad de los últimos 3 meses en débito)
   const months = [0, -1, -2].map((o) => {
     const r = monthRange(o);
-    return totalsFor(txs, r.start, r.end).expense;
+    return totalsFor(txs, r.start, r.end).debit.expense;
   });
   const avg = months.reduce((a, b) => a + b, 0) / 3;
   const variance = avg > 0 ? Math.sqrt(months.reduce((a, b) => a + (b - avg) ** 2, 0) / 3) / avg : 0;
@@ -110,12 +155,16 @@ export function computeHealth(
   const raw = savings + ratioScore + budgetScore + trendScore + stability;
   const score = Math.round(clamp(raw, 0, 100));
 
-  if (current.income === 0 && current.expense === 0) {
-    reasons.unshift("Aún no hay movimientos este mes: registra uno para calcular tu salud.");
-  } else if (current.balance < 0) {
-    reasons.unshift("Este mes estás gastando más de lo que ingresas.");
+  if (current.debit.income === 0 && current.debit.expense === 0) {
+    reasons.unshift("Aún no hay movimientos en débito este mes: registra uno para calcular tu salud.");
+  } else if (current.debit.balance < 0) {
+    reasons.unshift("Este mes tus gastos en débito superan tus ingresos.");
   } else if (rate >= 0.2) {
-    reasons.unshift(`Estás ahorrando el ${Math.round(rate * 100)}% de tus ingresos.`);
+    reasons.unshift(`Estás ahorrando el ${Math.round(rate * 100)}% de tus ingresos líquidos.`);
+  }
+
+  if (current.credit.expense > 0) {
+    reasons.push(`Tus compras a crédito se gestionan por separado para proteger tu salud financiera líquida.`);
   }
 
   const topExpense = topCategory(txs, categories, cur.start, cur.end);
@@ -217,14 +266,17 @@ export function buildInsights(
   const p = totalsFor(txs, prev.start, prev.end);
   const out: { tone: "good" | "warn" | "bad" | "info"; text: string }[] = [];
 
-  if (c.expense > c.income && c.income > 0) {
-    out.push({ tone: "bad", text: "Tus gastos superaron tus ingresos este mes. Revisemos juntos qué categorías lo están impulsando." });
+  if (c.debit.expense > c.debit.income && c.debit.income > 0) {
+    out.push({ tone: "bad", text: "Tus gastos en débito superaron tus ingresos este mes. Revisemos juntos qué categorías lo están impulsando." });
   }
-  if (c.savingsRate >= 0.1 && c.income > 0) {
-    out.push({ tone: "good", text: `Llevas un ahorro del ${Math.round(c.savingsRate * 100)}% de tus ingresos este mes.` });
+  if (c.debit.savingsRate >= 0.1 && c.debit.income > 0) {
+    out.push({ tone: "good", text: `Llevas un ahorro del ${Math.round(c.debit.savingsRate * 100)}% de tus ingresos líquidos este mes.` });
   }
-  if (p.expense > 0 && c.expense > p.expense * 1.15) {
-    out.push({ tone: "warn", text: `Tu gasto total creció ${Math.round(((c.expense - p.expense) / p.expense) * 100)}% respecto al mes pasado.` });
+  if (p.debit.expense > 0 && c.debit.expense > p.debit.expense * 1.15) {
+    out.push({ tone: "warn", text: `Tu gasto en débito creció ${Math.round(((c.debit.expense - p.debit.expense) / p.debit.expense) * 100)}% respecto al mes pasado.` });
+  }
+  if (c.credit.expense > 0) {
+    out.push({ tone: "info", text: "Tus consumos a crédito se mantienen separados de tu saldo de débito para no comprometer tu liquidez." });
   }
 
   const breakdown = categoryBreakdown(txs, categories, cur.start, cur.end);
