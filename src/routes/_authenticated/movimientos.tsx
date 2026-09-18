@@ -26,7 +26,8 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/u
 import { EmptyState } from "@/components/EmptyState";
 import { useTransactionSheet } from "./route";
 import { useCategories, useDeleteTransaction, useTransactions } from "@/lib/data";
-import { formatDate, formatMoney, paymentLabel } from "@/lib/format";
+import { formatMoney, formatDate, paymentLabel } from "@/lib/format";
+import { shareFileNative } from "@/lib/native";
 import type { Transaction } from "@/lib/types";
 
 export const Route = createFileRoute("/_authenticated/movimientos")({
@@ -72,7 +73,7 @@ function Movimientos() {
     [txs, type, cat, from, to, q, categories],
   );
 
-  function exportCsv() {
+  async function exportCsv() {
     const rows = [
       ["fecha", "tipo", "categoria", "descripcion", "importe", "moneda", "metodo_pago", "notas"],
       ...filtered.map((t) => [
@@ -89,14 +90,23 @@ function Movimientos() {
     const csv = rows
       .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(";"))
       .join("\n");
-    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `plantwallet-movimientos-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("CSV exportado");
+    const fileName = `plantwallet-movimientos-${new Date().toISOString().slice(0, 10)}.csv`;
+    const shared = await shareFileNative(
+      fileName,
+      csv,
+      "Reporte de Movimientos PlantWallet",
+      "Exportación de movimientos en formato CSV 🌱"
+    );
+    if (!shared) {
+      const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    toast.success("¡Reporte CSV generado con éxito! 📄");
   }
 
   return (
@@ -259,7 +269,7 @@ function Movimientos() {
                 await del.mutateAsync(toDelete);
                 setToDelete(null);
                 setDetail(null);
-                toast.success("Movimiento eliminado");
+                toast.success("Movimiento eliminado correctamente");
               }}
             >
               Eliminar

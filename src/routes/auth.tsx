@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FinancialPlant } from "@/components/FinancialPlant";
 import { useAuth } from "@/lib/auth";
+import { getLocalProfile } from "@/lib/localDb";
 import {
   isBiometricAvailable,
   isBiometricEnabled,
@@ -68,7 +69,8 @@ function LocalAuthPage() {
       const success = await promptBiometricAuth("Desbloquea tu billetera");
       if (success) {
         unlockWithBiometric();
-        toast.success("¡Bienvenido de vuelta! 🌱");
+        const userName = user?.name || getLocalProfile().name;
+        toast.success(userName ? `¡Bienvenido a PlantWallet, ${userName}! 🌱` : "¡Bienvenido a PlantWallet! 🌱");
         navigate({ to: "/inicio", replace: true });
       }
     } finally {
@@ -85,7 +87,8 @@ function LocalAuthPage() {
           promptBiometricAuth("Desbloquea tu billetera").then((success) => {
             if (success) {
               unlockWithBiometric();
-              toast.success("¡Bienvenido de vuelta! 🌱");
+              const userName = user?.name || getLocalProfile().name;
+              toast.success(userName ? `¡Bienvenido a PlantWallet, ${userName}! 🌱` : "¡Bienvenido a PlantWallet! 🌱");
               navigate({ to: "/inicio", replace: true });
             }
           });
@@ -183,7 +186,8 @@ function LocalAuthPage() {
     try {
       const ok = await unlock(pinCandidate);
       if (ok) {
-        toast.success("Acceso concedido 🌱");
+        const userName = user?.name || getLocalProfile().name;
+        toast.success(userName ? `¡Bienvenido a PlantWallet, ${userName}! 🌱` : "¡Bienvenido a PlantWallet! 🌱");
         navigate({ to: "/inicio", replace: true });
         return true;
       } else if (showToastOnFail) {

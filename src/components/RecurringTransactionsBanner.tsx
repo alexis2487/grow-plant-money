@@ -114,7 +114,7 @@ export function RecurringTransactionsBanner({
       });
 
       toast.success(
-        `¡"${tx.description || "Movimiento"}" registrado para este mes!`
+        `¡"${tx.description || "Movimiento"}" registrado con éxito! 🌱`
       );
     } catch (err: any) {
       toast.error("Error al registrar movimiento recurrente.");
@@ -147,7 +147,7 @@ export function RecurringTransactionsBanner({
         });
         count++;
       }
-      toast.success(`¡Se registraron ${count} movimientos recurrentes con éxito! 🌱`);
+      toast.success(`¡${count} movimientos recurrentes registrados! Tu planta está al día 🌱`);
     } catch {
       toast.error("Hubo un problema al registrar algunos movimientos.");
     } finally {

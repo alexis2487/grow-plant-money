@@ -364,7 +364,7 @@ function Inicio() {
                         title="Eliminar meta"
                         onClick={async () => {
                           await deleteBudget.mutateAsync(b.id);
-                          toast.success("Meta eliminada");
+                          toast.success("Presupuesto eliminado");
                         }}
                       >
                         <Trash2 className="h-3.5 w-3.5" aria-hidden />
@@ -524,12 +524,12 @@ function Inicio() {
                     amount: val,
                     currency,
                   });
-                  toast.success("Meta guardada exitosamente 🎯");
+                  toast.success("¡Presupuesto guardado exitosamente! 🎯");
                   setGoalModalOpen(false);
                   setGoalCatId("");
                   setGoalAmount("");
                 } catch {
-                  toast.error("No se pudo guardar la meta. Inténtalo de nuevo.");
+                  toast.error("No se pudo guardar el presupuesto. Inténtalo de nuevo.");
                 }
               }}
             >

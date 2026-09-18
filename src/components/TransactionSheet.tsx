@@ -89,11 +89,15 @@ export function TransactionSheet({ open, onOpenChange, type, editing }: Props) {
         recurring_rule: recurring ? rule : null,
       });
       toast.success(
-        editing ? "Movimiento actualizado" : kind === "income" ? "Ingreso guardado 🌱" : "Gasto guardado",
+        editing
+          ? "¡Movimiento actualizado con éxito! ✨"
+          : kind === "income"
+            ? "¡Ingreso registrado! Tu planta florece 🌱"
+            : "¡Gasto registrado con éxito! 🌿",
       );
       onOpenChange(false);
     } catch {
-      toast.error("No pudimos guardar el movimiento. Inténtalo de nuevo.");
+      toast.error("No se pudo guardar el movimiento. Inténtalo de nuevo.");
     }
   }
 

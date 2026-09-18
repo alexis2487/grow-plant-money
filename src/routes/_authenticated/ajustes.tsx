@@ -88,7 +88,7 @@ function Ajustes() {
               const v = e.target.value.trim();
               if (v && v !== profile?.name) {
                 updateProfile.mutate({ name: v });
-                toast.success("Nombre actualizado");
+                toast.success("¡Nombre actualizado con éxito! 🌱");
               }
             }}
           />
@@ -99,7 +99,7 @@ function Ajustes() {
             value={profile?.base_currency ?? "COP"}
             onValueChange={(v) => {
               updateProfile.mutate({ base_currency: v });
-              toast.success("Moneda actualizada");
+              toast.success("Moneda principal actualizada");
             }}
           >
             <SelectTrigger className="mt-1 !h-12">
@@ -195,7 +195,7 @@ function CategoriesSection({ emojis }: { emojis: string[] }) {
                   disabled={restore.isPending}
                   onClick={async () => {
                     await restore.mutateAsync();
-                    toast.success("Categorías por defecto restauradas");
+                    toast.success("Categorías por defecto restauradas 🌱");
                   }}
                 >
                   Restaurar categorías iniciales
@@ -289,7 +289,7 @@ function CategoriesSection({ emojis }: { emojis: string[] }) {
                     color: "#3f9d74",
                   });
                   setName("");
-                  toast.success("Categoría creada");
+                  toast.success("¡Categoría creada exitosamente! 🏷️");
                 }}
               >
                 <Plus className="mr-2 h-4 w-4" aria-hidden /> Crear categoría
@@ -317,7 +317,7 @@ function NotificationsSection() {
     } else {
       await cancelDailyReminder();
       setReminderEnabled(false);
-      toast.success("Recordatorio desactivado");
+      toast.success("Recordatorio diario desactivado");
     }
   };
 
@@ -364,7 +364,7 @@ function SecuritySection() {
       if (ok) {
         setBiometricEnabled(true);
         setBioEnabled(true);
-        toast.success("Desbloqueo con huella/rostro activado 🌱");
+        toast.success("¡Desbloqueo biométrico activado con éxito! ✨");
       } else {
         toast.error("No se pudo verificar la autenticación biométrica.");
       }
@@ -449,7 +449,7 @@ function SecuritySection() {
                 setBusy(false);
                 setCurrent("");
                 setNext("");
-                toast.success("¡PIN de acceso actualizado con éxito! 🌱");
+                toast.success("¡PIN de acceso actualizado con éxito! 🔒");
               }}
             >
               Cambiar PIN de acceso
@@ -461,7 +461,7 @@ function SecuritySection() {
               onClick={() => {
                 lock();
                 navigate({ to: "/auth", replace: true });
-                toast.info("Aplicación bloqueada.");
+                toast.info("PlantWallet bloqueada por seguridad");
               }}
             >
               Bloquear aplicación ahora
@@ -496,7 +496,7 @@ function DataSection() {
       a.click();
       URL.revokeObjectURL(url);
     }
-    toast.success("Copia de seguridad generada 🌱");
+    toast.success("¡Copia de seguridad generada con éxito! 📦");
   }
 
   function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -546,7 +546,7 @@ function DataSection() {
       a.click();
       URL.revokeObjectURL(url);
     }
-    toast.success("Movimientos exportados a CSV");
+    toast.success("¡Reporte CSV generado con éxito! 📄");
   }
 
   return (
