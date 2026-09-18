@@ -1,6 +1,5 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { FinancialPlant } from "@/components/FinancialPlant";
 import { useAuth } from "@/lib/auth";
 
@@ -24,33 +23,25 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
-  const { user, loading } = useAuth();
+  const { isConfigured, isUnlocked, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/inicio", replace: true });
-  }, [user, loading, navigate]);
+    if (!loading) {
+      if (isConfigured && isUnlocked) {
+        navigate({ to: "/inicio", replace: true });
+      } else {
+        navigate({ to: "/auth", replace: true });
+      }
+    }
+  }, [isConfigured, isUnlocked, loading, navigate]);
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center gap-8 px-6 py-14 text-center">
-      <FinancialPlant score={95} size={200} />
-      <div className="space-y-3">
-        <h1 className="text-4xl font-extrabold tracking-tight">PlantWallet</h1>
-        <p className="text-lg text-muted-foreground">Cultiva mejor tus finanzas.</p>
-        <p className="text-sm text-muted-foreground">
-          Registra tus ingresos y gastos en segundos, entiende tu salud financiera de un vistazo y
-          haz crecer tu planta completando pequeños retos realistas.
-        </p>
-      </div>
-      <div className="w-full space-y-3">
-        <Button asChild className="h-14 w-full rounded-2xl text-base">
-          <Link to="/auth">Crear mi cuenta</Link>
-        </Button>
-        <Button asChild variant="secondary" className="h-14 w-full rounded-2xl text-base">
-          <Link to="/auth" search={{ mode: "login" }}>
-            Ya tengo cuenta
-          </Link>
-        </Button>
+    <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-4 p-6 text-center">
+      <FinancialPlant score={95} size={160} />
+      <div className="space-y-2">
+        <h1 className="text-3xl font-extrabold tracking-tight">PlantWallet</h1>
+        <p className="text-sm text-muted-foreground animate-pulse">Cargando tu jardín financiero...</p>
       </div>
     </main>
   );

@@ -1,18 +1,20 @@
-import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, redirect, useNavigate, useRouterState } from "@tanstack/react-router";
 import { createContext, useContext, useEffect, useState } from "react";
 import { Home, Wallet, BarChart3, Trophy, Settings, Plus, Minus } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { TransactionSheet } from "@/components/TransactionSheet";
 import { useProfile } from "@/lib/data";
+import { useAuth } from "@/lib/auth";
+import { getLocalAuthConfig } from "@/lib/localDb";
 import type { Transaction, TxType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth" });
-    return { user: data.user };
+    if (typeof window !== "undefined") {
+      const cfg = getLocalAuthConfig();
+      if (!cfg.isConfigured) throw redirect({ to: "/auth" });
+    }
   },
   component: AppShell,
 });
@@ -33,11 +35,19 @@ const NAV = [
 
 function AppShell() {
   const { data: profile } = useProfile();
+  const { isConfigured, isUnlocked, loading } = useAuth();
+  const navigate = useNavigate();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetType, setSheetType] = useState<TxType>("expense");
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [fabOpen, setFabOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  useEffect(() => {
+    if (!loading && (!isConfigured || !isUnlocked)) {
+      navigate({ to: "/auth", replace: true });
+    }
+  }, [isConfigured, isUnlocked, loading, navigate]);
 
   useEffect(() => {
     const theme = profile?.theme ?? "system";

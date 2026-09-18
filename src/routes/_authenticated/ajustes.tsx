@@ -21,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
 import {
   useBudgets,
   useCategories,
@@ -31,6 +30,12 @@ import {
   useTransactions,
   useUpdateProfile,
 } from "@/lib/data";
+import { useAuth } from "@/lib/auth";
+import {
+  exportLocalBackupJson,
+  importLocalBackupJson,
+  verifyLocalPin,
+} from "@/lib/localDb";
 import { CURRENCIES, formatMoney, parseAmount, paymentLabel } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/ajustes")({
@@ -312,7 +317,7 @@ function BudgetsSection() {
 
 function SecuritySection() {
   const navigate = useNavigate();
-  const qc = useQueryClient();
+  const { lock, resetMasterPin, securityQuestion } = useAuth();
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [busy, setBusy] = useState(false);
@@ -322,62 +327,69 @@ function SecuritySection() {
       <Accordion type="single" collapsible>
         <AccordionItem value="sec" className="border-0">
           <AccordionTrigger className="py-0 text-base font-semibold hover:no-underline">
-            Seguridad
+            Seguridad & Clave Local
           </AccordionTrigger>
-          <AccordionContent className="space-y-3 pt-4">
+          <AccordionContent className="space-y-3.5 pt-4">
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground">
+              <span>Tu pregunta de recuperación configurada: </span>
+              <strong className="text-foreground">¿{securityQuestion || "Nombre de tu primera mascota"}?</strong>
+            </div>
+
             <div>
-              <Label htmlFor="cp">Contraseña actual</Label>
+              <Label htmlFor="cp">Clave o PIN actual</Label>
               <Input
                 id="cp"
                 type="password"
                 value={current}
                 onChange={(e) => setCurrent(e.target.value)}
+                placeholder="Ingresa tu clave actual"
                 className="mt-1 h-12"
-                autoComplete="current-password"
               />
             </div>
             <div>
-              <Label htmlFor="np">Nueva contraseña</Label>
+              <Label htmlFor="np">Nueva clave o PIN</Label>
               <Input
                 id="np"
                 type="password"
                 value={next}
                 onChange={(e) => setNext(e.target.value)}
+                placeholder="Mínimo 4 caracteres"
                 className="mt-1 h-12"
-                autoComplete="new-password"
               />
             </div>
             <Button
               variant="secondary"
-              className="h-12 w-full rounded-xl"
+              className="h-12 w-full rounded-xl font-medium"
               disabled={busy}
               onClick={async () => {
-                if (next.length < 8) return toast.error("La nueva contraseña debe tener al menos 8 caracteres.");
+                if (!current.trim()) return toast.error("Ingresa tu clave actual.");
+                if (next.length < 4) return toast.error("La nueva clave debe tener al menos 4 caracteres.");
                 setBusy(true);
-                const { error } = await supabase.auth.updateUser({
-                  password: next,
-                  current_password: current,
-                } as { password: string });
+                const valid = await verifyLocalPin(current);
+                if (!valid) {
+                  setBusy(false);
+                  return toast.error("La clave actual es incorrecta.");
+                }
+                await resetMasterPin(next);
                 setBusy(false);
-                if (error) return toast.error(error.message);
                 setCurrent("");
                 setNext("");
-                toast.success("Contraseña actualizada");
+                toast.success("¡Clave de acceso actualizada!");
               }}
             >
-              Cambiar contraseña
+              Cambiar clave de acceso
             </Button>
+
             <Button
               variant="destructive"
-              className="h-12 w-full rounded-xl"
-              onClick={async () => {
-                await qc.cancelQueries();
-                qc.clear();
-                await supabase.auth.signOut();
+              className="h-12 w-full rounded-xl font-medium"
+              onClick={() => {
+                lock();
                 navigate({ to: "/auth", replace: true });
+                toast.info("Aplicación bloqueada.");
               }}
             >
-              Cerrar sesión
+              Bloquear aplicación ahora
             </Button>
           </AccordionContent>
         </AccordionItem>
@@ -389,8 +401,38 @@ function SecuritySection() {
 function DataSection() {
   const { data: txs = [] } = useTransactions();
   const { data: categories = [] } = useCategories();
+  const qc = useQueryClient();
 
-  function exportAll() {
+  function exportBackup() {
+    const json = exportLocalBackupJson();
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `plantwallet_backup_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Copia de seguridad descargada 🌱");
+  }
+
+  function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const text = event.target?.result as string;
+      const ok = importLocalBackupJson(text);
+      if (ok) {
+        await qc.invalidateQueries();
+        toast.success("¡Copia de seguridad restaurada con éxito! 🌱");
+      } else {
+        toast.error("El archivo de respaldo no es válido.");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function exportCsv() {
     const rows = [
       ["fecha", "tipo", "categoria", "descripcion", "importe", "moneda", "metodo_pago", "notas"],
       ...txs.map((t) => [
@@ -408,20 +450,32 @@ function DataSection() {
     const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" }));
     const a = document.createElement("a");
     a.href = url;
-    a.download = "plantwallet-datos.csv";
+    a.download = "plantwallet_movimientos.csv";
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Datos exportados");
+    toast.success("Movimientos exportados a CSV");
   }
 
   return (
-    <section className="surface space-y-3 p-4">
-      <h2 className="text-base font-semibold">Tus datos</h2>
-      <p className="text-sm text-muted-foreground">
-        Tus movimientos son privados: solo tú puedes verlos con tu sesión iniciada.
+    <section className="surface space-y-3.5 p-4">
+      <h2 className="text-base font-semibold">Copia de seguridad y datos</h2>
+      <p className="text-xs text-muted-foreground leading-relaxed">
+        Tus datos son 100% privados y residen en este dispositivo. Puedes exportar un respaldo para guardarlo en Google Drive o transferirlo a otro teléfono.
       </p>
-      <Button variant="secondary" className="h-12 w-full rounded-xl" onClick={exportAll}>
-        Exportar todos mis datos (CSV)
+
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+        <Button variant="outline" className="h-12 rounded-xl text-xs font-semibold" onClick={exportBackup}>
+          💾 Crear respaldo (JSON)
+        </Button>
+
+        <label className="flex h-12 cursor-pointer items-center justify-center rounded-xl border border-input bg-background px-4 text-xs font-semibold hover:bg-accent hover:text-accent-foreground">
+          📥 Restaurar respaldo (JSON)
+          <input type="file" accept=".json" onChange={handleImport} className="hidden" />
+        </label>
+      </div>
+
+      <Button variant="secondary" className="h-12 w-full rounded-xl text-xs font-medium" onClick={exportCsv}>
+        📊 Exportar movimientos (CSV)
       </Button>
     </section>
   );
