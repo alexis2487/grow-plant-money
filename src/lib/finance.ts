@@ -82,9 +82,10 @@ export const HEALTH_WEIGHTS = {
 };
 
 export interface HealthResult {
-  score: number;
+  score: number | null;
+  hasTransactions: boolean;
   label: string;
-  state: "excellent" | "healthy" | "attention" | "risk" | "critical";
+  state: "excellent" | "healthy" | "attention" | "risk" | "critical" | "unrated";
   reasons: string[];
   current: PeriodTotals;
   previous: PeriodTotals;
@@ -100,6 +101,24 @@ export function computeHealth(
   const current = totalsFor(txs, cur.start, cur.end);
   const previous = totalsFor(txs, prev.start, prev.end);
   const reasons: string[] = [];
+
+  // Cuando el usuario no tiene movimientos registrados (estado inicial / semilla / brote)
+  const totalCount = txs.length;
+  if (totalCount === 0 || (current.debit.count === 0 && current.credit.count === 0 && previous.debit.count === 0)) {
+    return {
+      score: null,
+      hasTransactions: false,
+      label: "Brote Inicial",
+      state: "unrated",
+      reasons: [
+        "Tu planta está en estado de semilla/brote 🌱",
+        "Registra tu primer ingreso o gasto para comenzar a medir tu salud financiera.",
+        "Tus compras a crédito se gestionan por separado para proteger tu liquidez.",
+      ],
+      current,
+      previous,
+    };
+  }
 
   // 1. Capacidad de ahorro (basada en el flujo real de débito / liquidez)
   const rate = current.debit.savingsRate;
@@ -132,7 +151,7 @@ export function computeHealth(
   }
 
   // 4. Tendencia (basada en gastos de débito para reflejar el comportamiento recurrente)
-  let trendScore = HEALTH_WEIGHTS.trend * 0.6;
+  let trendScore = HEALTH_WEIGHTS.trend;
   if (previous.debit.expense > 0) {
     const delta = (current.debit.expense - previous.debit.expense) / previous.debit.expense;
     trendScore = clamp(0.6 - delta * 2, 0, 1) * HEALTH_WEIGHTS.trend;
@@ -141,6 +160,12 @@ export function computeHealth(
     } else if (delta < -0.05) {
       reasons.push(`Tus gastos en débito bajaron ${Math.abs(Math.round(delta * 100))}% frente al mes anterior.`);
     }
+  } else if (current.debit.expense === 0 && current.debit.income > 0) {
+    // Rendimiento perfecto: cero gastos e ingresos positivos
+    trendScore = HEALTH_WEIGHTS.trend;
+  } else if (current.debit.expense > 0 && current.debit.income > 0) {
+    // Primer mes con movimientos saludables: proporcional a la tasa de ahorro
+    trendScore = clamp(0.7 + (rate * 0.3), 0.7, 1) * HEALTH_WEIGHTS.trend;
   }
 
   // 5. Estabilidad (variabilidad de los últimos 3 meses en débito)
@@ -159,6 +184,8 @@ export function computeHealth(
     reasons.unshift("Aún no hay movimientos en débito este mes: registra uno para calcular tu salud.");
   } else if (current.debit.balance < 0) {
     reasons.unshift("Este mes tus gastos en débito superan tus ingresos.");
+  } else if (current.debit.expense === 0 && current.debit.income > 0) {
+    reasons.unshift("¡Impecable! Cero gastos registrados y 100% de ahorro este mes.");
   } else if (rate >= 0.2) {
     reasons.unshift(`Estás ahorrando el ${Math.round(rate * 100)}% de tus ingresos líquidos.`);
   }
@@ -172,10 +199,11 @@ export function computeHealth(
     reasons.push(`${topExpense.emoji} ${topExpense.name} concentra el ${topExpense.share}% de tus gastos.`);
   }
 
-  return { score, label: healthLabel(score), state: healthState(score), reasons, current, previous };
+  return { score, hasTransactions: true, label: healthLabel(score), state: healthState(score), reasons, current, previous };
 }
 
-export function healthState(score: number): HealthResult["state"] {
+export function healthState(score: number | null): HealthResult["state"] {
+  if (score === null) return "unrated";
   if (score >= 90) return "excellent";
   if (score >= 75) return "healthy";
   if (score >= 55) return "attention";
@@ -183,8 +211,10 @@ export function healthState(score: number): HealthResult["state"] {
   return "critical";
 }
 
-export function healthLabel(score: number) {
+export function healthLabel(score: number | null) {
+  if (score === null) return "Brote Inicial";
   return {
+    unrated: "Brote Inicial",
     excellent: "Excelente",
     healthy: "Saludable",
     attention: "Atención",

@@ -9,7 +9,7 @@ export interface ReportData {
   expense: number;
   balance: number;
   savingsRate?: number;
-  healthScore?: number;
+  healthScore?: number | null;
   healthLabel?: string;
   transactionCount?: number;
   categories: { emoji: string; name: string; amount: number; share: number }[];

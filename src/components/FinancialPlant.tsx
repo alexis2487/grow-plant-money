@@ -3,7 +3,8 @@ import { cn } from "@/lib/utils";
 import { healthState } from "@/lib/finance";
 
 interface Props {
-  score: number;
+  score?: number | null;
+  isSprout?: boolean;
   size?: number;
   className?: string;
   potStyle?: string;
@@ -18,7 +19,8 @@ interface Props {
  * Soporta skins personalizados de plantas, macetas, fondos y efectos animados.
  */
 export function FinancialPlant({
-  score,
+  score = 90,
+  isSprout = false,
   size = 180,
   className,
   potStyle = "pot_ceramic",
@@ -27,15 +29,18 @@ export function FinancialPlant({
   background: bgProp,
   backgroundStyle,
 }: Props) {
+  const isInitialSprout = isSprout || score === null;
+  const numScore = score ?? 90;
   const background = backgroundStyle ?? bgProp ?? "bg_room";
-  const state = healthState(score);
-  const growth = Math.max(0.2, Math.min(1, score / 100));
+  const state = isInitialSprout ? "unrated" : healthState(numScore);
+  const growth = Math.max(0.2, Math.min(1, numScore / 100));
   const stemHeight = 35 + growth * 75;
-  const leafCount = score <= 0 ? 1 : Math.max(2, Math.round(growth * 8));
-  const wilt = state === "critical" || state === "risk";
+  const leafCount = numScore <= 0 ? 1 : Math.max(2, Math.round(growth * 8));
+  const wilt = !isInitialSprout && (state === "critical" || state === "risk");
 
   // Colores dinámicos según estado de salud
   const healthHue = {
+    unrated: "#10b981",
     excellent: "#10b981",
     healthy: "#22c55e",
     attention: "#eab308",
@@ -256,8 +261,54 @@ export function FinancialPlant({
             2. PLANTA SEGÚN SKIN SELECCIONADO
         ======================================================== */}
         <g className={wilt ? undefined : "animate-sway"}>
-          {/* ============ SKIN: CACTUS ============ */}
-          {plantStyle === "plant_cactus" ? (
+          {isInitialSprout ? (
+            /* ============ BROTE / SEMILLA INICIAL (SIN MOVIMIENTOS) ============ */
+            <g>
+              {/* Montículo de tierra fértil */}
+              <ellipse cx="80" cy="148" rx="22" ry="5" fill="#3d1d07" opacity="0.9" />
+
+              {/* Tallo del brote tierno creciendo */}
+              <path
+                d="M80 148 C 79 135, 81 122, 80 108"
+                stroke="#10b981"
+                strokeWidth="4"
+                strokeLinecap="round"
+                fill="none"
+              />
+
+              {/* Cotiledón / Hoja izquierda de brote */}
+              <g className="animate-rise" style={{ animationDelay: "0.05s" }}>
+                <ellipse
+                  cx="69"
+                  cy="104"
+                  rx="13"
+                  ry="7.5"
+                  fill={`url(#${uid}-leaf-classic)`}
+                  transform="rotate(-28 69 104)"
+                  filter={`url(#${uid}-shadow)`}
+                />
+                <line x1="78" y1="108" x2="63" y2="101" stroke="#047857" strokeWidth="1.2" opacity="0.5" />
+              </g>
+
+              {/* Cotiledón / Hoja derecha de brote */}
+              <g className="animate-rise" style={{ animationDelay: "0.15s" }}>
+                <ellipse
+                  cx="91"
+                  cy="104"
+                  rx="13"
+                  ry="7.5"
+                  fill={`url(#${uid}-leaf-classic)`}
+                  transform="rotate(28 91 104)"
+                  filter={`url(#${uid}-shadow)`}
+                />
+                <line x1="82" y1="108" x2="97" y2="101" stroke="#047857" strokeWidth="1.2" opacity="0.5" />
+              </g>
+
+              {/* Pequeño brote naciente en el centro con destello dorado de vida */}
+              <ellipse cx="80" cy="101" rx="4.5" ry="8" fill="#6ee7b7" />
+              <circle cx="80" cy="90" r="3.5" fill="#facc15" opacity="0.95" className="animate-pulse" />
+            </g>
+          ) : plantStyle === "plant_cactus" ? (
             <g>
               {/* Tallo principal del cactus con relieve */}
               <rect

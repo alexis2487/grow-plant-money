@@ -186,6 +186,19 @@
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
 }
 
+@utility safe-top {
+  padding-top: max(env(safe-area-inset-top, 0px), 1.75rem);
+}
+
+@utility pt-safe {
+  padding-top: max(env(safe-area-inset-top, 0px), 1.25rem);
+}
+
+@utility h-safe-top {
+  height: max(env(safe-area-inset-top, 0px), 2.25rem);
+}
+
+
 @keyframes pw-sway {
   0%,
   100% {

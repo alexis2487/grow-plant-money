@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">PlantWallet</string>
+    <string name="title_activity_main">PlantWallet</string>
+    <string name="package_name">com.plantwallet.app</string>
+    <string name="custom_url_scheme">com.plantwallet.app</string>
+</resources>

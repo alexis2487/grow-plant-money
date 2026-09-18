@@ -55,6 +55,15 @@ function AppShell() {
       theme === "dark" ||
       (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
     document.documentElement.classList.toggle("dark", dark);
+
+    if (typeof window !== "undefined") {
+      import("@capacitor/status-bar")
+        .then(({ StatusBar, Style }) => {
+          StatusBar.setStyle({ style: dark ? Style.Dark : Style.Light }).catch(() => {});
+          StatusBar.setBackgroundColor({ color: dark ? "#141a16" : "#f7faf7" }).catch(() => {});
+        })
+        .catch(() => {});
+    }
   }, [profile?.theme]);
 
   const api: SheetApi = {
@@ -110,8 +119,17 @@ function AppShell() {
           </div>
         </aside>
 
-        <div className="min-w-0 flex-1">
-          <main className="mx-auto w-full max-w-3xl px-4 pt-5 pb-32 md:pb-10">
+        <div className="min-w-0 flex-1 flex flex-col min-h-screen">
+          {/* Escudo protector sticky superior: evita que al hacer scroll el contenido choque o se entrelace con la hora, wifi, batería y cámara frontal */}
+          <div
+            className="sticky top-0 z-30 w-full bg-background/95 backdrop-blur-md transition-colors md:hidden border-b border-border/20"
+            style={{
+              height: "max(env(safe-area-inset-top, 0px), 32px)",
+            }}
+            aria-hidden="true"
+          />
+
+          <main className="mx-auto w-full max-w-3xl px-4 pt-3 pb-32 md:pb-10 flex-1">
             <Outlet />
           </main>
         </div>

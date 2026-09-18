@@ -88,13 +88,13 @@ function LocalAuthPage() {
   const handleStep2 = (e: React.FormEvent) => {
     e.preventDefault();
     if (!pin.trim()) {
-      return toast.error("Por favor, ingresa una clave o PIN de seguridad.");
+      return toast.error("Por favor, ingresa un PIN numérico.");
     }
     if (pin.length < 4) {
-      return toast.error("La clave debe tener al menos 4 caracteres.");
+      return toast.error("El PIN debe tener al menos 4 números.");
     }
     if (pin !== confirmPin) {
-      return toast.error("Las claves no coinciden. Verifícalas.");
+      return toast.error("Los PIN ingresados no coinciden. Verifícalos.");
     }
     setOnboardingStep(3);
   };
@@ -126,21 +126,28 @@ function LocalAuthPage() {
   // -------------------------------------------------------------
   // HANDLERS BLOQUEO / RECUPERACIÓN
   // -------------------------------------------------------------
-  const handleUnlock = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputPin.trim()) return toast.error("Ingresa tu clave.");
+  const submitUnlock = async (pinCandidate: string, showToastOnFail = true) => {
+    if (!pinCandidate.trim() || busy) return false;
     setBusy(true);
     try {
-      const ok = await unlock(inputPin);
+      const ok = await unlock(pinCandidate);
       if (ok) {
         toast.success("Acceso concedido 🌱");
         navigate({ to: "/inicio", replace: true });
-      } else {
-        toast.error("Clave incorrecta. Inténtalo de nuevo.");
+        return true;
+      } else if (showToastOnFail) {
+        toast.error("PIN incorrecto. Inténtalo de nuevo.");
       }
+      return false;
     } finally {
       setBusy(false);
     }
+  };
+
+  const handleUnlock = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputPin.trim()) return toast.error("Ingresa tu PIN.");
+    await submitUnlock(inputPin, true);
   };
 
   const handleRecovery = async (e: React.FormEvent) => {
@@ -189,7 +196,7 @@ function LocalAuthPage() {
   // =========================================================================
   if (!isConfigured) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-md flex-col justify-between p-6">
+      <main className="mx-auto flex min-h-screen max-w-md flex-col justify-between p-6 safe-top safe-bottom">
         {/* Barra superior de progreso */}
         <div className="w-full pt-2">
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-2 font-medium">
@@ -278,7 +285,7 @@ function LocalAuthPage() {
                 <div>
                   <div className="flex items-center justify-between">
                     <Label htmlFor="master-pin" className="text-sm font-semibold">
-                      Clave de acceso o PIN
+                      PIN de seguridad (4 dígitos)
                     </Label>
                     <button
                       type="button"
@@ -292,27 +299,33 @@ function LocalAuthPage() {
                   <Input
                     id="master-pin"
                     type={showPin ? "text" : "password"}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    autoComplete="new-password"
                     value={pin}
-                    onChange={(e) => setPin(e.target.value)}
-                    placeholder="Mínimo 4 números o letras"
-                    className="mt-1.5 h-13 rounded-2xl text-base px-4 tracking-wider"
+                    onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                    placeholder="••••"
+                    className="mt-1.5 h-13 rounded-2xl text-center text-xl font-bold tracking-[0.3em]"
                     autoFocus
-                    maxLength={20}
+                    maxLength={8}
                   />
                 </div>
 
                 <div>
                   <Label htmlFor="confirm-pin" className="text-sm font-semibold">
-                    Confirma tu clave
+                    Confirma tu PIN
                   </Label>
                   <Input
                     id="confirm-pin"
                     type={showPin ? "text" : "password"}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    autoComplete="new-password"
                     value={confirmPin}
-                    onChange={(e) => setConfirmPin(e.target.value)}
-                    placeholder="Repite tu clave"
-                    className="mt-1.5 h-13 rounded-2xl text-base px-4 tracking-wider"
-                    maxLength={20}
+                    onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                    placeholder="••••"
+                    className="mt-1.5 h-13 rounded-2xl text-center text-xl font-bold tracking-[0.3em]"
+                    maxLength={8}
                   />
                 </div>
 
@@ -481,7 +494,7 @@ function LocalAuthPage() {
   // VISTA 2: PANTALLA DE BLOQUEO / RECUPERACIÓN (USUARIO YA CONFIGURADO)
   // =========================================================================
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-between p-6">
+    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-between p-6 safe-top safe-bottom">
       <div className="my-auto space-y-6 text-center">
         <div className="flex justify-center">
           <FinancialPlant score={92} size={160} />
@@ -503,7 +516,7 @@ function LocalAuthPage() {
               <div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="unlock-pin" className="text-sm font-semibold">
-                    Clave o PIN
+                    PIN de seguridad
                   </Label>
                   <button
                     type="button"
@@ -517,12 +530,21 @@ function LocalAuthPage() {
                 <Input
                   id="unlock-pin"
                   type={showInputPin ? "text" : "password"}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  autoComplete="current-password"
                   value={inputPin}
-                  onChange={(e) => setInputPin(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "").slice(0, 8);
+                    setInputPin(val);
+                    if (val.length === 4) {
+                      submitUnlock(val, false);
+                    }
+                  }}
                   placeholder="••••"
-                  className="mt-1.5 h-13 rounded-2xl text-center text-xl font-bold tracking-widest"
+                  className="mt-1.5 h-14 rounded-2xl text-center text-3xl font-bold tracking-[0.35em]"
                   autoFocus
-                  maxLength={20}
+                  maxLength={8}
                 />
               </div>
 
@@ -576,29 +598,37 @@ function LocalAuthPage() {
 
               <div>
                 <Label htmlFor="new-pin" className="text-sm font-semibold">
-                  Nueva clave o PIN
+                  Nuevo PIN (4 dígitos)
                 </Label>
                 <Input
                   id="new-pin"
                   type="password"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  autoComplete="new-password"
                   value={newPin}
-                  onChange={(e) => setNewPin(e.target.value)}
-                  placeholder="Mínimo 4 caracteres"
-                  className="mt-1.5 h-12 rounded-xl"
+                  onChange={(e) => setNewPin(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                  placeholder="••••"
+                  className="mt-1.5 h-12 rounded-xl text-center text-xl font-bold tracking-[0.3em]"
+                  maxLength={8}
                 />
               </div>
 
               <div>
                 <Label htmlFor="confirm-new-pin" className="text-sm font-semibold">
-                  Confirma tu nueva clave
+                  Confirma tu nuevo PIN
                 </Label>
                 <Input
                   id="confirm-new-pin"
                   type="password"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  autoComplete="new-password"
                   value={confirmNewPin}
-                  onChange={(e) => setConfirmNewPin(e.target.value)}
-                  placeholder="Repite la nueva clave"
-                  className="mt-1.5 h-12 rounded-xl"
+                  onChange={(e) => setConfirmNewPin(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                  placeholder="••••"
+                  className="mt-1.5 h-12 rounded-xl text-center text-xl font-bold tracking-[0.3em]"
+                  maxLength={8}
                 />
               </div>
 
