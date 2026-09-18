@@ -101,7 +101,7 @@ function LocalAuthPage() {
         }
       });
     }
-  }, [isConfigured, isUnlocked]);
+  }, [isConfigured, isUnlocked, navigate, unlockWithBiometric, user?.name]);
 
   // Si ya está configurado y desbloqueado, ir directo a inicio
   useEffect(() => {
@@ -170,8 +170,9 @@ function LocalAuthPage() {
       await setupMaster(name, pin, question, answer);
       toast.success(`¡Bienvenido a bordo, ${name.trim()}! 🌱`);
       navigate({ to: "/inicio", replace: true });
-    } catch (err: any) {
-      toast.error(err?.message || "Ocurrió un error al configurar tu cuenta local.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Ocurrió un error al configurar tu cuenta local.";
+      toast.error(msg);
     } finally {
       setBusy(false);
     }

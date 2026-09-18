@@ -23,15 +23,55 @@ export function formatMoney(value: number, currency = "COP", compact = false) {
   }).format(value);
 }
 
-export function parseAmount(raw: string) {
-  const cleaned = raw.replace(/[^\d.,-]/g, "").replace(/\.(?=\d{3}\b)/g, "");
-  const normalized = cleaned.replace(",", ".");
-  const n = Number(normalized);
+export function parseAmount(raw: string): number {
+  if (!raw || typeof raw !== "string") return 0;
+  let cleaned = raw.trim().replace(/[^\d.,-]/g, "");
+  if (!cleaned || cleaned === "-") return 0;
+
+  const hasComma = cleaned.includes(",");
+  const hasDot = cleaned.includes(".");
+
+  if (hasComma && hasDot) {
+    const lastComma = cleaned.lastIndexOf(",");
+    const lastDot = cleaned.lastIndexOf(".");
+    if (lastComma > lastDot) {
+      cleaned = cleaned.replace(/\./g, "").replace(",", ".");
+    } else {
+      cleaned = cleaned.replace(/,/g, "");
+    }
+  } else if (hasComma) {
+    const commaCount = (cleaned.match(/,/g) || []).length;
+    if (commaCount > 1) {
+      cleaned = cleaned.replace(/,/g, "");
+    } else if (/,\d{3}$/.test(cleaned)) {
+      cleaned = cleaned.replace(",", "");
+    } else {
+      cleaned = cleaned.replace(",", ".");
+    }
+  } else if (hasDot) {
+    const dotCount = (cleaned.match(/\./g) || []).length;
+    if (dotCount > 1) {
+      cleaned = cleaned.replace(/\./g, "");
+    } else if (/\.\d{3}$/.test(cleaned)) {
+      cleaned = cleaned.replace(".", "");
+    }
+  }
+
+  const n = Number(cleaned);
   return Number.isFinite(n) ? n : 0;
 }
 
 export function formatDate(date: string | Date, style: "short" | "long" = "short") {
-  const d = typeof date === "string" ? new Date(`${date}T00:00:00`) : date;
+  let d: Date;
+  if (typeof date === "string") {
+    const s = date.includes("T") ? date : `${date}T00:00:00`;
+    d = new Date(s);
+  } else {
+    d = date;
+  }
+  if (Number.isNaN(d.getTime())) {
+    d = new Date();
+  }
   return new Intl.DateTimeFormat("es-CO", {
     day: "2-digit",
     month: style === "long" ? "long" : "2-digit",

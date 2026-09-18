@@ -67,7 +67,7 @@ function Inicio() {
   const equipped = useMemo(() => {
     const codes: Record<string, string> = {};
     for (const item of mine.filter((m) => m.equipped)) {
-      const cat = catalog.find((c) => c.id === item.plant_item_id);
+      const cat = catalog.find((c) => c.id === item.plant_item_id || c.code === item.plant_item_id);
       if (cat) codes[cat.item_type] = cat.code;
     }
     return codes;

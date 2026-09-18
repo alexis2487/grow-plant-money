@@ -244,8 +244,8 @@ function Retos() {
     if (item.unlock_points === 0) return true;
     if (unlockedIds.has(item.id)) return true;
     return mine.some((m) => {
-      const c = catalog.find((cat) => cat.id === m.plant_item_id);
-      return c?.code === item.code;
+      const c = catalog.find((cat) => cat.id === m.plant_item_id || cat.code === m.plant_item_id);
+      return c?.code === item.code || m.plant_item_id === item.id;
     });
   };
 
@@ -265,7 +265,7 @@ function Retos() {
 
   const handleEquip = async (item: PlantItem) => {
     const userItem = mine.find((m) => {
-      const catItem = catalog.find((c) => c.id === m.plant_item_id);
+      const catItem = catalog.find((c) => c.id === m.plant_item_id || c.code === m.plant_item_id);
       return catItem?.code === item.code || m.plant_item_id === item.id;
     });
 
@@ -283,8 +283,9 @@ function Retos() {
       setPreviewCodes(null);
       setPreviewItem(null);
       toast.success(`¡${item.name} equipado con éxito! 🌱`);
-    } catch (err: any) {
-      toast.error(err?.message || "No se pudo equipar el elemento.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "No se pudo equipar el elemento.";
+      toast.error(msg);
     }
   };
 
@@ -297,8 +298,9 @@ function Retos() {
     try {
       await unlock.mutateAsync({ plantItemId: item.id });
       toast.success(`¡Desbloqueaste ${item.name}! 🎉 Ya puedes equiparlo.`);
-    } catch (err: any) {
-      toast.error(err?.message || "No se pudo desbloquear el elemento.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "No se pudo desbloquear el elemento.";
+      toast.error(msg);
     }
   };
 

@@ -94,15 +94,17 @@ export function RecurringTransactionsBanner({
     setBusyKeys((prev) => ({ ...prev, [key]: true }));
 
     try {
-      // Calcular la fecha para este mes: conservar el día del mes original si es posible
+      // Calcular la fecha para este mes: conservar el día del mes original si es posible, protegiendo contra desbordes de fin de mes
       const origDay = parseInt(tx.transaction_date.slice(8, 10), 10) || 1;
       const today = new Date();
-      const targetDate = new Date(today.getFullYear(), today.getMonth(), origDay);
+      const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+      const safeDay = Math.min(origDay, lastDayOfMonth);
+      const targetDate = new Date(today.getFullYear(), today.getMonth(), safeDay);
       const dateStr = isoDate(targetDate > today ? today : targetDate);
 
       await saveTx.mutateAsync({
         type: tx.type,
-        amount: tx.amount,
+        amount: Number(tx.amount),
         currency: tx.currency || currency,
         category_id: tx.category_id,
         transaction_date: dateStr,
@@ -116,7 +118,7 @@ export function RecurringTransactionsBanner({
       toast.success(
         `¡"${tx.description || "Movimiento"}" registrado con éxito! 🌱`
       );
-    } catch (err: any) {
+    } catch {
       toast.error("Error al registrar movimiento recurrente.");
     } finally {
       setBusyKeys((prev) => ({ ...prev, [key]: false }));
@@ -130,12 +132,14 @@ export function RecurringTransactionsBanner({
       for (const tx of pendingRecurring) {
         const origDay = parseInt(tx.transaction_date.slice(8, 10), 10) || 1;
         const today = new Date();
-        const targetDate = new Date(today.getFullYear(), today.getMonth(), origDay);
+        const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        const safeDay = Math.min(origDay, lastDayOfMonth);
+        const targetDate = new Date(today.getFullYear(), today.getMonth(), safeDay);
         const dateStr = isoDate(targetDate > today ? today : targetDate);
 
         await saveTx.mutateAsync({
           type: tx.type,
-          amount: tx.amount,
+          amount: Number(tx.amount),
           currency: tx.currency || currency,
           category_id: tx.category_id,
           transaction_date: dateStr,
@@ -157,7 +161,7 @@ export function RecurringTransactionsBanner({
 
   const totalExpense = pendingRecurring
     .filter((t) => t.type === "expense")
-    .reduce((acc, curr) => acc + curr.amount, 0);
+    .reduce((acc, curr) => acc + Number(curr.amount), 0);
 
   return (
     <div className="rounded-3xl border border-primary/25 bg-primary/5 p-4 shadow-sm space-y-3 animate-in fade-in duration-300">

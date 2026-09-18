@@ -5,6 +5,7 @@ import { TransactionSheet } from "@/components/TransactionSheet";
 import { useProfile } from "@/lib/data";
 import { useAuth } from "@/lib/auth";
 import { getLocalAuthConfig } from "@/lib/localDb";
+import { registerBackHandler } from "@/lib/native";
 import type { Transaction, TxType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -48,6 +49,14 @@ function AppShell() {
       navigate({ to: "/auth", replace: true });
     }
   }, [isConfigured, isUnlocked, loading, navigate]);
+
+  useEffect(() => {
+    if (!fabOpen) return;
+    return registerBackHandler(() => {
+      setFabOpen(false);
+      return true;
+    });
+  }, [fabOpen]);
 
   useEffect(() => {
     const theme = profile?.theme ?? "system";

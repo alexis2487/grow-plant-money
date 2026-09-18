@@ -93,7 +93,7 @@ function Movimientos() {
     const fileName = `plantwallet-movimientos-${new Date().toISOString().slice(0, 10)}.csv`;
     await shareFileNative(
       fileName,
-      csv,
+      `\uFEFF${csv}`,
       "Reporte de Movimientos PlantWallet",
       "Exportación de movimientos en formato CSV 🌱"
     );

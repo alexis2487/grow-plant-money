@@ -126,7 +126,10 @@ export function computeHealth(
 
   // 2. Relación ingresos / gastos (débito: el crédito no resta del débito para no falsear liquidez)
   const ratio = current.debit.income > 0 ? current.debit.expense / current.debit.income : current.debit.expense > 0 ? 2 : 0;
-  const ratioScore = clamp(1 - (ratio - 0.5) / 0.7, 0, 1) * HEALTH_WEIGHTS.incomeExpenseRatio;
+  const ratioScore =
+    current.debit.income === 0 && current.debit.expense === 0
+      ? 0
+      : clamp(1 - (ratio - 0.5) / 0.7, 0, 1) * HEALTH_WEIGHTS.incomeExpenseRatio;
 
   // 3. Cumplimiento de presupuestos
   let budgetScore = HEALTH_WEIGHTS.budgetCompliance;
@@ -287,7 +290,11 @@ export function dailySeries(txs: Transaction[], start: string, end: string) {
   for (const t of txs) {
     if (t.transaction_date < start || t.transaction_date > end) continue;
     const cur = map.get(t.transaction_date) ?? { income: 0, expense: 0 };
-    cur[t.type] += Number(t.amount);
+    if (t.type === "income") {
+      cur.income += Number(t.amount);
+    } else if (t.type === "expense") {
+      cur.expense += Number(t.amount);
+    }
     map.set(t.transaction_date, cur);
   }
   return [...map.entries()]
@@ -331,6 +338,7 @@ export function buildInsights(
   }
 
   for (const b of budgets) {
+    if (Number(b.amount) <= 0) continue;
     const cat = categories.find((x) => x.id === b.category_id);
     if (!cat) continue;
     const spent = sum(

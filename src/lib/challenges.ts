@@ -188,10 +188,12 @@ export function challengeProgress(c: UserChallenge) {
     return progress > 0 ? 100 : 0;
   }
 
-  return Math.min(100, Math.round((progress / target) * 100));
+  return Math.max(0, Math.min(100, Math.round((progress / target) * 100)));
 }
 
 export function daysLeft(endDate: string) {
-  const end = new Date(`${endDate}T23:59:59`);
-  return Math.max(0, Math.ceil((end.getTime() - Date.now()) / 86400000));
+  const dateOnly = endDate.includes("T") ? endDate.split("T")[0] : endDate;
+  const end = new Date(`${dateOnly}T23:59:59`);
+  const diff = end.getTime() - Date.now();
+  return Number.isNaN(diff) ? 0 : Math.max(0, Math.ceil(diff / 86400000));
 }

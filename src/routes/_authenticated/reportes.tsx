@@ -86,8 +86,8 @@ function Reportes() {
   const daily = useMemo(() => dailySeries(filteredTxs, range.start, range.end), [filteredTxs, range.start, range.end]);
   const health = useMemo(() => computeHealth(txs, budgets, categories), [txs, budgets, categories]);
 
-  // Cálculos específicos para el reporte activo
-  const daysInMonth = new Date(range.end).getDate();
+  // Cálculos específicos para el reporte activo (evitar bug de zona horaria UTC con parseInt)
+  const daysInMonth = parseInt(range.end.slice(8, 10), 10) || 30;
   const isCredit = reportType === "credit";
 
   const currentExpense = isCredit ? totals.credit.expense : totals.debit.expense;
