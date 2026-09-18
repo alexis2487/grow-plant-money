@@ -228,7 +228,11 @@ function topCategory(txs: Transaction[], categories: Category[], start: string, 
   return categoryBreakdown(txs, categories, start, end)[0];
 }
 
-export function monthlySeries(txs: Transaction[], monthsBack = 6) {
+export function monthlySeries(
+  txs: Transaction[],
+  monthsBack = 6,
+  accountType: "debit" | "credit" | "all" = "debit",
+) {
   const out: { label: string; income: number; expense: number; balance: number }[] = [];
   for (let i = monthsBack - 1; i >= 0; i--) {
     const r = monthRange(-i);
@@ -237,7 +241,13 @@ export function monthlySeries(txs: Transaction[], monthsBack = 6) {
     const label = new Intl.DateTimeFormat("es-CO", { month: "short" }).format(
       new Date(d.getFullYear(), d.getMonth() - i, 1),
     );
-    out.push({ label, income: t.income, expense: t.expense, balance: t.balance });
+    if (accountType === "credit") {
+      out.push({ label, income: t.credit.income, expense: t.credit.expense, balance: t.credit.balance });
+    } else if (accountType === "debit") {
+      out.push({ label, income: t.debit.income, expense: t.debit.expense, balance: t.debit.balance });
+    } else {
+      out.push({ label, income: t.income, expense: t.expense, balance: t.balance });
+    }
   }
   return out;
 }

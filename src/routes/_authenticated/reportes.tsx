@@ -13,7 +13,10 @@ import {
   XAxis,
 } from "recharts";
 import { toast } from "sonner";
+import { Wallet, CreditCard, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/EmptyState";
 import { useBudgets, useCategories, useChallenges, useProfile, useTransactions } from "@/lib/data";
 import {
@@ -21,6 +24,7 @@ import {
   categoryBreakdown,
   computeHealth,
   dailySeries,
+  isCreditTx,
   monthlySeries,
   totalsFor,
 } from "@/lib/finance";
@@ -33,10 +37,10 @@ export const Route = createFileRoute("/_authenticated/reportes")({
       { title: "Reportes — PlantWallet" },
       {
         name: "description",
-        content: "Evolución de tus ingresos y gastos, categorías principales y reporte PDF descargable.",
+        content: "Reportes financieros independientes de débito y tarjeta de crédito, categorías y PDF exportable.",
       },
       { property: "og:title", content: "Reportes — PlantWallet" },
-      { property: "og:description", content: "Analiza tus finanzas mes a mes." },
+      { property: "og:description", content: "Analiza tus finanzas en débito y tarjeta de crédito mes a mes." },
     ],
   }),
   component: Reportes,
@@ -57,26 +61,45 @@ function Reportes() {
   const { data: budgets = [] } = useBudgets();
   const { data: challenges = [] } = useChallenges();
   const [offset, setOffset] = useState(0);
+  const [reportType, setReportType] = useState<"debit" | "credit">("debit");
 
   const currency = profile?.base_currency ?? "COP";
   const range = monthRange(offset);
+
+  // Filtrar movimientos según el tipo de reporte seleccionado (débito o crédito)
+  const filteredTxs = useMemo(() => {
+    return txs.filter((t) => (reportType === "credit" ? isCreditTx(t) : !isCreditTx(t)));
+  }, [txs, reportType]);
+
   const totals = useMemo(() => totalsFor(txs, range.start, range.end), [txs, range.start, range.end]);
   const prevTotals = useMemo(() => {
     const r = monthRange(offset - 1);
     return totalsFor(txs, r.start, r.end);
   }, [txs, offset]);
+
   const breakdown = useMemo(
-    () => categoryBreakdown(txs, categories, range.start, range.end),
-    [txs, categories, range.start, range.end],
+    () => categoryBreakdown(filteredTxs, categories, range.start, range.end),
+    [filteredTxs, categories, range.start, range.end],
   );
-  const months = useMemo(() => monthlySeries(txs, 6), [txs]);
-  const daily = useMemo(() => dailySeries(txs, range.start, range.end), [txs, range.start, range.end]);
+
+  const months = useMemo(() => monthlySeries(txs, 6, reportType), [txs, reportType]);
+  const daily = useMemo(() => dailySeries(filteredTxs, range.start, range.end), [filteredTxs, range.start, range.end]);
   const health = useMemo(() => computeHealth(txs, budgets, categories), [txs, budgets, categories]);
 
-  const avgDaily = totals.expense / new Date(range.end).getDate();
+  // Cálculos específicos para el reporte activo
+  const daysInMonth = new Date(range.end).getDate();
+  const isCredit = reportType === "credit";
+
+  const currentExpense = isCredit ? totals.credit.expense : totals.debit.expense;
+  const currentIncome = isCredit ? totals.credit.income : totals.debit.income;
+  const currentBalance = isCredit ? totals.credit.balance : totals.debit.balance;
+  const currentCount = isCredit ? totals.credit.count : totals.debit.count;
+
+  const prevExpense = isCredit ? prevTotals.credit.expense : prevTotals.debit.expense;
+  const avgDaily = currentExpense / daysInMonth;
   const variation =
-    prevTotals.expense > 0
-      ? Math.round(((totals.expense - prevTotals.expense) / prevTotals.expense) * 100)
+    prevExpense > 0
+      ? Math.round(((currentExpense - prevExpense) / prevExpense) * 100)
       : 0;
 
   function exportPdf() {
@@ -84,12 +107,14 @@ function Reportes() {
       userName: profile?.name || "Usuario",
       period: monthLabel(offset),
       currency,
-      income: totals.income,
-      expense: totals.expense,
-      balance: totals.balance,
-      savingsRate: totals.savingsRate,
+      reportType,
+      income: currentIncome,
+      expense: currentExpense,
+      balance: currentBalance,
+      savingsRate: totals.debit.savingsRate,
       healthScore: health.score,
       healthLabel: health.label,
+      transactionCount: currentCount,
       categories: breakdown.slice(0, 10),
       months,
       insights: buildInsights(txs, categories, budgets).map((i) => i.text),
@@ -114,6 +139,48 @@ function Reportes() {
         </Button>
       </header>
 
+      {/* SELECTOR DE TIPO DE REPORTE: DÉBITO VS CRÉDITO */}
+      <Tabs
+        value={reportType}
+        onValueChange={(v) => setReportType(v as "debit" | "credit")}
+        className="w-full"
+      >
+        <TabsList className="grid h-12 w-full grid-cols-2 rounded-2xl bg-secondary p-1">
+          <TabsTrigger
+            value="debit"
+            className="flex items-center justify-center gap-2 rounded-xl py-2 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            <Wallet className="h-4 w-4 text-success" />
+            <span>Reporte Débito</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="credit"
+            className="flex items-center justify-center gap-2 rounded-xl py-2 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            <CreditCard className="h-4 w-4 text-warning" />
+            <span>Tarjeta de Crédito</span>
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {/* MENSAJE EXPLICATIVO SEGÚN EL TIPO DE REPORTE */}
+      {isCredit ? (
+        <div className="flex items-center gap-2.5 rounded-2xl border border-warning/25 bg-warning/5 p-3.5 text-xs text-muted-foreground">
+          <CreditCard className="h-4 w-4 shrink-0 text-warning" />
+          <span>
+            <strong>Reporte de Tarjeta de Crédito:</strong> Analiza compras a crédito, pagos o abonos a la tarjeta y saldo adeudado del período. No afecta tu liquidez en débito.
+          </span>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2.5 rounded-2xl border border-success/25 bg-success/5 p-3.5 text-xs text-muted-foreground">
+          <Wallet className="h-4 w-4 shrink-0 text-success" />
+          <span>
+            <strong>Reporte de Débito (Dinero Real):</strong> Refleja tus ingresos líquidos, gastos reales y capacidad de ahorro efectiva del mes.
+          </span>
+        </div>
+      )}
+
+      {/* NAVEGACIÓN ENTRE MESES */}
       <div className="flex gap-2">
         <Button variant="secondary" className="h-11 flex-1 rounded-xl" onClick={() => setOffset((o) => o - 1)}>
           ← Mes anterior
@@ -128,28 +195,50 @@ function Reportes() {
         </Button>
       </div>
 
-      <section className="grid grid-cols-2 gap-3">
-        <Kpi label="Ingresos" value={formatMoney(totals.income, currency)} />
-        <Kpi label="Gastos" value={formatMoney(totals.expense, currency)} />
-        <Kpi label="Balance" value={formatMoney(totals.balance, currency)} />
-        <Kpi label="Tasa de ahorro" value={`${Math.round(totals.savingsRate * 100)}%`} />
-        <Kpi label="Gasto diario promedio" value={formatMoney(avgDaily, currency)} />
-        <Kpi
-          label="Variación vs mes anterior"
-          value={`${variation > 0 ? "+" : ""}${variation}%`}
-        />
-      </section>
+      {/* TARJETAS KPI ADAPTADAS */}
+      {isCredit ? (
+        <section className="grid grid-cols-2 gap-3">
+          <Kpi label="Compras con crédito" value={formatMoney(totals.credit.expense, currency)} highlight="warning" />
+          <Kpi label="Pagos a la tarjeta" value={formatMoney(totals.credit.income, currency)} highlight="success" />
+          <Kpi label="Saldo adeudado neto" value={formatMoney(totals.credit.balance, currency)} />
+          <Kpi label="Movimientos a crédito" value={`${totals.credit.count} movimientos`} />
+          <Kpi label="Consumo diario promedio" value={formatMoney(avgDaily, currency)} />
+          <Kpi
+            label="Variación vs mes anterior"
+            value={`${variation > 0 ? "+" : ""}${variation}%`}
+          />
+        </section>
+      ) : (
+        <section className="grid grid-cols-2 gap-3">
+          <Kpi label="Ingresos líquidos" value={formatMoney(totals.debit.income, currency)} highlight="success" />
+          <Kpi label="Gastos en débito" value={formatMoney(totals.debit.expense, currency)} />
+          <Kpi label="Balance del mes" value={formatMoney(totals.debit.balance, currency)} />
+          <Kpi label="Tasa de ahorro" value={`${Math.round(totals.debit.savingsRate * 100)}%`} highlight="success" />
+          <Kpi label="Gasto diario promedio" value={formatMoney(avgDaily, currency)} />
+          <Kpi
+            label="Variación vs mes anterior"
+            value={`${variation > 0 ? "+" : ""}${variation}%`}
+          />
+        </section>
+      )}
 
-      {totals.count === 0 ? (
+      {currentCount === 0 ? (
         <EmptyState
-          emoji="📊"
-          title="Sin datos en este período"
-          description="Registra movimientos para ver aquí tus gráficos y comparaciones."
+          emoji={isCredit ? "💳" : "📊"}
+          title={isCredit ? "Sin compras a crédito en este mes" : "Sin movimientos en débito en este mes"}
+          description={
+            isCredit
+              ? "No se han registrado consumos con tarjeta de crédito en este período."
+              : "Registra movimientos en efectivo o débito para ver aquí tus gráficos y comparaciones."
+          }
         />
       ) : (
         <>
+          {/* GRÁFICO HISTÓRICO 6 MESES */}
           <section className="surface p-4">
-            <h2 className="text-base font-semibold">Ingresos vs gastos (6 meses)</h2>
+            <h2 className="text-base font-semibold">
+              {isCredit ? "Compras a crédito vs Pagos (6 meses)" : "Ingresos vs gastos en débito (6 meses)"}
+            </h2>
             <div className="mt-3 h-56 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={months}>
@@ -158,60 +247,81 @@ function Reportes() {
                     formatter={(v: number) => formatMoney(v, currency)}
                     contentStyle={{ borderRadius: 12, fontSize: 12 }}
                   />
-                  <Bar dataKey="income" name="Ingresos" fill="var(--chart-1)" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="expense" name="Gastos" fill="var(--chart-4)" radius={[6, 6, 0, 0]} />
+                  {isCredit ? (
+                    <>
+                      <Bar dataKey="expense" name="Compras a Crédito" fill="hsl(var(--warning))" radius={[6, 6, 0, 0]} />
+                      <Bar dataKey="income" name="Pagos / Abonos" fill="hsl(var(--success))" radius={[6, 6, 0, 0]} />
+                    </>
+                  ) : (
+                    <>
+                      <Bar dataKey="income" name="Ingresos Débito" fill="var(--chart-1)" radius={[6, 6, 0, 0]} />
+                      <Bar dataKey="expense" name="Gastos Débito" fill="var(--chart-4)" radius={[6, 6, 0, 0]} />
+                    </>
+                  )}
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </section>
 
+          {/* GRÁFICO POR CATEGORÍA */}
           <section className="surface p-4">
-            <h2 className="text-base font-semibold">Gastos por categoría</h2>
-            <div className="mt-3 h-56 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={breakdown.slice(0, 6)}
-                    dataKey="amount"
-                    nameKey="name"
-                    innerRadius="55%"
-                    outerRadius="85%"
-                    paddingAngle={2}
-                  >
-                    {breakdown.slice(0, 6).map((_, i) => (
-                      <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(v: number) => formatMoney(v, currency)}
-                    contentStyle={{ borderRadius: 12, fontSize: 12 }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <ol className="mt-2 space-y-1.5 text-sm">
-              {breakdown.slice(0, 6).map((c, i) => (
-                <li key={c.id} className="flex items-center justify-between gap-3">
-                  <span className="flex min-w-0 items-center gap-2">
-                    <span
-                      className="h-2.5 w-2.5 shrink-0 rounded-full"
-                      style={{ background: CHART_COLORS[i % CHART_COLORS.length] }}
-                      aria-hidden
-                    />
-                    <span className="truncate">
-                      {c.emoji} {c.name}
-                    </span>
-                  </span>
-                  <span className="shrink-0 tabular-nums text-muted-foreground">
-                    {formatMoney(c.amount, currency)} · {c.share}%
-                  </span>
-                </li>
-              ))}
-            </ol>
+            <h2 className="text-base font-semibold">
+              {isCredit ? "Compras a crédito por categoría" : "Gastos en débito por categoría"}
+            </h2>
+            {breakdown.length ? (
+              <>
+                <div className="mt-3 h-56 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={breakdown.slice(0, 6)}
+                        dataKey="amount"
+                        nameKey="name"
+                        innerRadius="55%"
+                        outerRadius="85%"
+                        paddingAngle={2}
+                      >
+                        {breakdown.slice(0, 6).map((_, i) => (
+                          <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        formatter={(v: number) => formatMoney(v, currency)}
+                        contentStyle={{ borderRadius: 12, fontSize: 12 }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <ol className="mt-2 space-y-1.5 text-sm">
+                  {breakdown.slice(0, 6).map((c, i) => (
+                    <li key={c.id} className="flex items-center justify-between gap-3">
+                      <span className="flex min-w-0 items-center gap-2">
+                        <span
+                          className="h-2.5 w-2.5 shrink-0 rounded-full"
+                          style={{ background: CHART_COLORS[i % CHART_COLORS.length] }}
+                          aria-hidden
+                        />
+                        <span className="truncate">
+                          {c.emoji} {c.name}
+                        </span>
+                      </span>
+                      <span className="shrink-0 tabular-nums text-muted-foreground">
+                        {formatMoney(c.amount, currency)} · {c.share}%
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </>
+            ) : (
+              <p className="mt-2 text-sm text-muted-foreground">No hay categorías registradas en este período.</p>
+            )}
           </section>
 
+          {/* GRÁFICO DIARIO */}
           <section className="surface p-4">
-            <h2 className="text-base font-semibold">Gasto diario del mes</h2>
+            <h2 className="text-base font-semibold">
+              {isCredit ? "Consumo diario con tarjeta de crédito" : "Gasto diario del mes en débito"}
+            </h2>
             <div className="mt-3 h-48 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={daily}>
@@ -220,8 +330,17 @@ function Reportes() {
                     formatter={(v: number) => formatMoney(v, currency)}
                     contentStyle={{ borderRadius: 12, fontSize: 12 }}
                   />
-                  <Line type="monotone" dataKey="expense" name="Gastos" stroke="var(--chart-4)" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="income" name="Ingresos" stroke="var(--chart-1)" strokeWidth={2} dot={false} />
+                  {isCredit ? (
+                    <>
+                      <Line type="monotone" dataKey="expense" name="Compras a Crédito" stroke="hsl(var(--warning))" strokeWidth={2} dot={false} />
+                      <Line type="monotone" dataKey="income" name="Pagos Tarjeta" stroke="hsl(var(--success))" strokeWidth={2} dot={false} />
+                    </>
+                  ) : (
+                    <>
+                      <Line type="monotone" dataKey="expense" name="Gastos Débito" stroke="var(--chart-4)" strokeWidth={2} dot={false} />
+                      <Line type="monotone" dataKey="income" name="Ingresos Débito" stroke="var(--chart-1)" strokeWidth={2} dot={false} />
+                    </>
+                  )}
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -232,11 +351,29 @@ function Reportes() {
   );
 }
 
-function Kpi({ label, value }: { label: string; value: string }) {
+function Kpi({
+  label,
+  value,
+  highlight,
+}: {
+  label: string;
+  value: string;
+  highlight?: "success" | "warning";
+}) {
   return (
     <div className="surface p-4">
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 text-lg font-semibold tabular-nums">{value}</p>
+      <p
+        className={`mt-1 text-lg font-semibold tabular-nums ${
+          highlight === "success"
+            ? "text-success"
+            : highlight === "warning"
+              ? "text-warning"
+              : ""
+        }`}
+      >
+        {value}
+      </p>
     </div>
   );
 }
