@@ -1,7 +1,7 @@
 # PlantWallet 🌱
 > *Cultiva mejor tus finanzas.*
 
-**PlantWallet** es una aplicación de gestión de finanzas personales diseñada bajo un enfoque mobile-first, disponible tanto en la web como en dispositivos móviles mediante empaquetado nativo.
+**PlantWallet** es una aplicación móvil de gestión de finanzas personales diseñada exclusivamente para dispositivos móviles (Android).
 
 A través de una metáfora botánica viva, PlantWallet representa la salud financiera del usuario mediante el estado de una planta dinámica: los hábitos consistentes de ahorro, el cumplimiento de presupuestos y el equilibrio en los gastos impulsan su crecimiento y floración, mientras que los desbalances de liquidez alertan oportunamente al usuario para tomar mejores decisiones.
 
@@ -34,4 +34,4 @@ La finalidad de PlantWallet es proporcionar una experiencia privada, intuitiva y
 
 ## 👤 Autor
 
-Desarrollado y mantenido por **Alexis Romero** ([@alexis2487](https://github.com/alexis2487)).
+Desarrollado y mantenido por **Alexis Martínez** ([@alexis2487](https://github.com/alexis2487)).

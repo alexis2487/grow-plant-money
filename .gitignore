@@ -17,6 +17,16 @@ dist-ssr
 .nitro
 *.local
 
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+
+# External tooling & platform artifacts
+/.lovable/
+/supabase/
+/AGENTS.md
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
