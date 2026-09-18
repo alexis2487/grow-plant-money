@@ -15,12 +15,19 @@ import {
   Smartphone,
   Eye,
   EyeOff,
+  Fingerprint,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FinancialPlant } from "@/components/FinancialPlant";
 import { useAuth } from "@/lib/auth";
+import {
+  isBiometricAvailable,
+  isBiometricEnabled,
+  promptBiometricAuth,
+} from "@/lib/native";
+import { useRef } from "react";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -45,9 +52,53 @@ function LocalAuthPage() {
     securityQuestion,
     setupMaster,
     unlock,
+    unlockWithBiometric,
     verifyAnswer,
     resetMasterPin,
   } = useAuth();
+
+  // Biometría
+  const [hasBiometric, setHasBiometric] = useState(false);
+  const biometricAttemptedRef = useRef(false);
+
+  const handleBiometricUnlock = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const success = await promptBiometricAuth("Desbloquea tu billetera");
+      if (success) {
+        unlockWithBiometric();
+        toast.success("¡Bienvenido de vuelta! 🌱");
+        navigate({ to: "/inicio", replace: true });
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isConfigured && !isUnlocked && isBiometricEnabled() && !biometricAttemptedRef.current) {
+      biometricAttemptedRef.current = true;
+      isBiometricAvailable().then((avail) => {
+        if (avail) {
+          setHasBiometric(true);
+          promptBiometricAuth("Desbloquea tu billetera").then((success) => {
+            if (success) {
+              unlockWithBiometric();
+              toast.success("¡Bienvenido de vuelta! 🌱");
+              navigate({ to: "/inicio", replace: true });
+            }
+          });
+        }
+      });
+    } else if (isConfigured && !isUnlocked) {
+      isBiometricAvailable().then((avail) => {
+        if (avail && isBiometricEnabled()) {
+          setHasBiometric(true);
+        }
+      });
+    }
+  }, [isConfigured, isUnlocked]);
 
   // Si ya está configurado y desbloqueado, ir directo a inicio
   useEffect(() => {
@@ -549,8 +600,20 @@ function LocalAuthPage() {
               </div>
 
               <Button type="submit" disabled={busy} className="h-13 w-full rounded-2xl text-base font-semibold">
-                Desbloquear <Lock className="ml-2 h-4 w-4" />
+                Desbloquear con PIN <Lock className="ml-2 h-4 w-4" />
               </Button>
+
+              {hasBiometric && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBiometricUnlock}
+                  disabled={busy}
+                  className="h-13 w-full rounded-2xl border-primary/30 hover:border-primary text-primary font-semibold flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <Fingerprint className="h-5 w-5" /> Desbloquear con huella / rostro
+                </Button>
+              )}
 
               <div className="text-center pt-2">
                 <Button

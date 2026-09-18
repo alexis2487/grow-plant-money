@@ -20,6 +20,7 @@ import { HealthCard } from "@/components/HealthCard";
 import { ChallengeCard } from "@/components/ChallengeCard";
 import { EmptyState } from "@/components/EmptyState";
 import { DynamicFinancialTips } from "@/components/DynamicFinancialTips";
+import { RecurringTransactionsBanner } from "@/components/RecurringTransactionsBanner";
 import {
   useBudgets,
   useCategories,
@@ -112,6 +113,12 @@ function Inicio() {
         potStyle={equipped.pot}
         backgroundStyle={equipped.background}
         effect={equipped.effect}
+      />
+
+      <RecurringTransactionsBanner
+        transactions={txs ?? []}
+        categories={categories}
+        currency={currency}
       />
 
       <section className="surface p-5">

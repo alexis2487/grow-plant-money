@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Fingerprint, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +35,16 @@ import {
   importLocalBackupJson,
   verifyLocalPin,
 } from "@/lib/localDb";
+import {
+  isBiometricAvailable,
+  isBiometricEnabled,
+  setBiometricEnabled,
+  promptBiometricAuth,
+  isReminderNotificationEnabled,
+  scheduleDailyReminder,
+  cancelDailyReminder,
+  shareFileNative,
+} from "@/lib/native";
 import { CURRENCIES, formatMoney, parseAmount, paymentLabel } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/ajustes")({
@@ -145,6 +155,7 @@ function Ajustes() {
 
 
       <CategoriesSection emojis={EMOJIS} />
+      <NotificationsSection />
       <SecuritySection />
       <DataSection />
 
@@ -291,46 +302,134 @@ function CategoriesSection({ emojis }: { emojis: string[] }) {
   );
 }
 
+function NotificationsSection() {
+  const [reminderEnabled, setReminderEnabled] = useState(isReminderNotificationEnabled());
+
+  const handleToggleReminder = async (checked: boolean) => {
+    if (checked) {
+      const success = await scheduleDailyReminder(20, 0);
+      if (success) {
+        setReminderEnabled(true);
+        toast.success("Recordatorio diario configurado para las 8:00 PM 🌱");
+      } else {
+        toast.error("Debes conceder permiso de notificaciones para recibir recordatorios.");
+      }
+    } else {
+      await cancelDailyReminder();
+      setReminderEnabled(false);
+      toast.success("Recordatorio desactivado");
+    }
+  };
+
+  return (
+    <section className="surface p-4 space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="space-y-0.5">
+          <Label className="flex items-center gap-1.5 text-base font-semibold">
+            <Bell className="h-4 w-4 text-primary" /> Recordatorio diario (8:00 PM)
+          </Label>
+          <p className="text-xs text-muted-foreground">
+            Te recuerda regar tu planta financiera registrando tus movimientos del día.
+          </p>
+        </div>
+        <Switch
+          checked={reminderEnabled}
+          onCheckedChange={handleToggleReminder}
+        />
+      </div>
+    </section>
+  );
+}
+
 function SecuritySection() {
   const navigate = useNavigate();
   const { lock, resetMasterPin, securityQuestion } = useAuth();
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [busy, setBusy] = useState(false);
+  const [bioAvailable, setBioAvailable] = useState(false);
+  const [bioEnabled, setBioEnabled] = useState(isBiometricEnabled());
+
+  useEffect(() => {
+    isBiometricAvailable().then(setBioAvailable);
+  }, []);
+
+  const handleToggleBiometric = async (checked: boolean) => {
+    if (checked) {
+      const avail = await isBiometricAvailable();
+      if (!avail) {
+        return toast.error("Tu teléfono no tiene huella o rostro registrado en Ajustes de Android.");
+      }
+      const ok = await promptBiometricAuth("Verifica tu huella para habilitar el desbloqueo rápido");
+      if (ok) {
+        setBiometricEnabled(true);
+        setBioEnabled(true);
+        toast.success("Desbloqueo con huella/rostro activado 🌱");
+      } else {
+        toast.error("No se pudo verificar la autenticación biométrica.");
+      }
+    } else {
+      setBiometricEnabled(false);
+      setBioEnabled(false);
+      toast.success("Desbloqueo biométrico desactivado");
+    }
+  };
 
   return (
     <section className="surface p-4">
       <Accordion type="single" collapsible>
         <AccordionItem value="sec" className="border-0">
           <AccordionTrigger className="py-0 text-base font-semibold hover:no-underline">
-            Seguridad y Clave
+            Seguridad y Acceso
           </AccordionTrigger>
-          <AccordionContent className="space-y-3.5 pt-4">
+          <AccordionContent className="space-y-4 pt-4">
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3">
+              <div className="space-y-0.5">
+                <Label className="flex items-center gap-1.5 text-sm font-semibold">
+                  <Fingerprint className="h-4 w-4 text-primary" /> Huella / Desbloqueo Facial
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {bioAvailable ? "Entra a PlantWallet en 0.2 segundos sin digitar tu PIN." : "Configura tu huella en los Ajustes de tu teléfono para activarlo."}
+                </p>
+              </div>
+              <Switch
+                checked={bioEnabled}
+                disabled={!bioAvailable}
+                onCheckedChange={handleToggleBiometric}
+              />
+            </div>
+
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground">
               <span>Tu pregunta de recuperación configurada: </span>
               <strong className="text-foreground">¿{securityQuestion || "Nombre de tu primera mascota"}?</strong>
             </div>
 
             <div>
-              <Label htmlFor="cp">Clave o PIN actual</Label>
+              <Label htmlFor="cp">PIN actual</Label>
               <Input
                 id="cp"
                 type="password"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={current}
-                onChange={(e) => setCurrent(e.target.value)}
-                placeholder="Ingresa tu clave actual"
-                className="mt-1 h-12"
+                onChange={(e) => setCurrent(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                placeholder="Ingresa tu PIN actual"
+                className="mt-1 h-12 text-center text-lg font-bold tracking-widest"
+                maxLength={8}
               />
             </div>
             <div>
-              <Label htmlFor="np">Nueva clave o PIN</Label>
+              <Label htmlFor="np">Nuevo PIN de 4 dígitos</Label>
               <Input
                 id="np"
                 type="password"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={next}
-                onChange={(e) => setNext(e.target.value)}
-                placeholder="Mínimo 4 caracteres"
-                className="mt-1 h-12"
+                onChange={(e) => setNext(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                placeholder="Mínimo 4 números"
+                className="mt-1 h-12 text-center text-lg font-bold tracking-widest"
+                maxLength={8}
               />
             </div>
             <Button
@@ -338,22 +437,22 @@ function SecuritySection() {
               className="h-12 w-full rounded-xl font-medium"
               disabled={busy}
               onClick={async () => {
-                if (!current.trim()) return toast.error("Ingresa tu clave actual.");
-                if (next.length < 4) return toast.error("La nueva clave debe tener al menos 4 caracteres.");
+                if (!current.trim()) return toast.error("Ingresa tu PIN actual.");
+                if (next.length < 4) return toast.error("El nuevo PIN debe tener al menos 4 números.");
                 setBusy(true);
                 const valid = await verifyLocalPin(current);
                 if (!valid) {
                   setBusy(false);
-                  return toast.error("La clave actual es incorrecta.");
+                  return toast.error("El PIN actual es incorrecto.");
                 }
                 await resetMasterPin(next);
                 setBusy(false);
                 setCurrent("");
                 setNext("");
-                toast.success("¡Clave de acceso actualizada!");
+                toast.success("¡PIN de acceso actualizado con éxito! 🌱");
               }}
             >
-              Cambiar clave de acceso
+              Cambiar PIN de acceso
             </Button>
 
             <Button
@@ -379,16 +478,25 @@ function DataSection() {
   const { data: categories = [] } = useCategories();
   const qc = useQueryClient();
 
-  function exportBackup() {
+  async function exportBackup() {
     const json = exportLocalBackupJson();
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `plantwallet_backup_${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Copia de seguridad descargada 🌱");
+    const fileName = `plantwallet_backup_${new Date().toISOString().slice(0, 10)}.json`;
+    const shared = await shareFileNative(
+      fileName,
+      json,
+      "Copia de seguridad PlantWallet",
+      "Respaldo seguro de finanzas personales en PlantWallet 🌱"
+    );
+    if (!shared) {
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    toast.success("Copia de seguridad generada 🌱");
   }
 
   function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -408,7 +516,7 @@ function DataSection() {
     reader.readAsText(file);
   }
 
-  function exportCsv() {
+  async function exportCsv() {
     const rows = [
       ["fecha", "tipo", "categoria", "descripcion", "importe", "moneda", "metodo_pago", "notas"],
       ...txs.map((t) => [
@@ -423,12 +531,21 @@ function DataSection() {
       ]),
     ];
     const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(";")).join("\n");
-    const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" }));
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "plantwallet_movimientos.csv";
-    a.click();
-    URL.revokeObjectURL(url);
+    const fileName = `plantwallet_movimientos_${new Date().toISOString().slice(0, 10)}.csv`;
+    const shared = await shareFileNative(
+      fileName,
+      `\uFEFF${csv}`,
+      "Movimientos PlantWallet",
+      "Reporte de transacciones de PlantWallet 🌱"
+    );
+    if (!shared) {
+      const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
     toast.success("Movimientos exportados a CSV");
   }
 

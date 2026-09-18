@@ -22,6 +22,7 @@ interface AuthValue {
   securityQuestion: string;
   setupMaster: (name: string, pin: string, question: string, answer: string) => Promise<void>;
   unlock: (pin: string) => Promise<boolean>;
+  unlockWithBiometric: () => void;
   lock: () => void;
   verifyAnswer: (answer: string) => Promise<boolean>;
   resetMasterPin: (newPin: string) => Promise<void>;
@@ -36,6 +37,7 @@ const AuthContext = createContext<AuthValue>({
   securityQuestion: "",
   setupMaster: async () => {},
   unlock: async () => false,
+  unlockWithBiometric: () => {},
   lock: () => {},
   verifyAnswer: async () => false,
   resetMasterPin: async () => {},
@@ -85,6 +87,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false;
   };
 
+  const unlockWithBiometric = () => {
+    setIsUnlocked(true);
+    const profile = getLocalProfile();
+    setUser({ id: "local_user", name: profile.name || "Jardinero" });
+  };
+
   const lock = () => {
     setIsUnlocked(false);
   };
@@ -111,6 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       securityQuestion,
       setupMaster,
       unlock,
+      unlockWithBiometric,
       lock,
       verifyAnswer,
       resetMasterPin,
