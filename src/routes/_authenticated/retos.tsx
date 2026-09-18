@@ -32,6 +32,7 @@ import {
 } from "@/lib/data";
 import { suggestChallenges } from "@/lib/challenges";
 import { formatMoney, isoDate, monthRange, parseAmount } from "@/lib/format";
+import { useTranslation } from "@/i18n";
 import type { Difficulty, PlantItem } from "@/lib/types";
 
 export const Route = createFileRoute("/_authenticated/retos")({
@@ -40,20 +41,40 @@ export const Route = createFileRoute("/_authenticated/retos")({
       { title: "Retos y Colección — PlantWallet" },
       {
         name: "description",
-        content: "Retos financieros del sistema, Growth Points y colección dinámica de tu planta con vista previa en vivo.",
+        content:
+          "Retos financieros del sistema, Growth Points y colección dinámica de tu planta con vista previa en vivo.",
       },
       { property: "og:title", content: "Retos y Colección — PlantWallet" },
-      { property: "og:description", content: "Mejora tus hábitos financieros y personaliza tu planta con skins exclusivas." },
+      {
+        property: "og:description",
+        content: "Mejora tus hábitos financieros y personaliza tu planta con skins exclusivas.",
+      },
     ],
   }),
   component: Retos,
 });
 
 const RARITY_INFO = {
-  common: { label: "Común", border: "border-border", badgeBg: "bg-secondary text-secondary-foreground" },
-  rare: { label: "Raro", border: "border-blue-500/40", badgeBg: "bg-blue-500/10 text-blue-500 dark:text-blue-400" },
-  epic: { label: "Épico", border: "border-purple-500/40", badgeBg: "bg-purple-500/10 text-purple-500 dark:text-purple-400" },
-  legendary: { label: "Legendario", border: "border-amber-500/50", badgeBg: "bg-amber-500/15 text-amber-500 dark:text-amber-400 font-semibold" },
+  common: {
+    label: "Común",
+    border: "border-border",
+    badgeBg: "bg-secondary text-secondary-foreground",
+  },
+  rare: {
+    label: "Raro",
+    border: "border-blue-500/40",
+    badgeBg: "bg-blue-500/10 text-blue-500 dark:text-blue-400",
+  },
+  epic: {
+    label: "Épico",
+    border: "border-purple-500/40",
+    badgeBg: "bg-purple-500/10 text-purple-500 dark:text-purple-400",
+  },
+  legendary: {
+    label: "Legendario",
+    border: "border-amber-500/50",
+    badgeBg: "bg-amber-500/15 text-amber-500 dark:text-amber-400 font-semibold",
+  },
 } as const;
 
 /** Mini-renderizador visual de cada elemento en la tienda de colección */
@@ -116,7 +137,9 @@ function ItemVisualPreview({ item }: { item: PlantItem }) {
     };
 
     return (
-      <div className={`relative mb-3 flex h-14 w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br ${c.gradient} shadow-xs border border-border/40`}>
+      <div
+        className={`relative mb-3 flex h-14 w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br ${c.gradient} shadow-xs border border-border/40`}
+      >
         {c.decor}
       </div>
     );
@@ -124,16 +147,46 @@ function ItemVisualPreview({ item }: { item: PlantItem }) {
 
   if (item.item_type === "pot") {
     const potIcons: Record<string, { icon: string; label: string; bg: string }> = {
-      pot_ceramic: { icon: "🏺", label: "Cerámica Terracota", bg: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30" },
-      pot_wood: { icon: "🪵", label: "Roble Rústico", bg: "bg-stone-500/15 text-stone-700 dark:text-stone-300 border-stone-500/30" },
-      pot_minimal: { icon: "🥛", label: "Porcelana Blanca", bg: "bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-300/40" },
-      pot_metal: { icon: "🏆", label: "Oro Pulido", bg: "bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 border-yellow-500/40" },
-      pot_crystal: { icon: "💎", label: "Terrario Cristal", bg: "bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border-cyan-500/40" },
-      pot_cyber: { icon: "⚡", label: "Cyberpunk Neón", bg: "bg-fuchsia-950 text-cyan-300 border-cyan-500/60" },
+      pot_ceramic: {
+        icon: "🏺",
+        label: "Cerámica Terracota",
+        bg: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30",
+      },
+      pot_wood: {
+        icon: "🪵",
+        label: "Roble Rústico",
+        bg: "bg-stone-500/15 text-stone-700 dark:text-stone-300 border-stone-500/30",
+      },
+      pot_minimal: {
+        icon: "🥛",
+        label: "Porcelana Blanca",
+        bg: "bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-300/40",
+      },
+      pot_metal: {
+        icon: "🏆",
+        label: "Oro Pulido",
+        bg: "bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 border-yellow-500/40",
+      },
+      pot_crystal: {
+        icon: "💎",
+        label: "Terrario Cristal",
+        bg: "bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border-cyan-500/40",
+      },
+      pot_cyber: {
+        icon: "⚡",
+        label: "Cyberpunk Neón",
+        bg: "bg-fuchsia-950 text-cyan-300 border-cyan-500/60",
+      },
     };
-    const p = potIcons[item.code] ?? { icon: "🏺", label: item.name, bg: "bg-secondary border-border" };
+    const p = potIcons[item.code] ?? {
+      icon: "🏺",
+      label: item.name,
+      bg: "bg-secondary border-border",
+    };
     return (
-      <div className={`relative mb-3 flex h-14 w-full items-center justify-center gap-2 rounded-xl border ${p.bg} shadow-xs text-sm font-medium`}>
+      <div
+        className={`relative mb-3 flex h-14 w-full items-center justify-center gap-2 rounded-xl border ${p.bg} shadow-xs text-sm font-medium`}
+      >
         <span className="text-xl">{p.icon}</span>
         <span className="text-xs">{p.label}</span>
       </div>
@@ -153,7 +206,9 @@ function ItemVisualPreview({ item }: { item: PlantItem }) {
     };
     const pl = plantIcons[item.code] ?? { icon: "🌱", bg: "bg-secondary border-border" };
     return (
-      <div className={`relative mb-3 flex h-14 w-full items-center justify-center gap-2 rounded-xl border ${pl.bg} shadow-xs text-sm font-medium`}>
+      <div
+        className={`relative mb-3 flex h-14 w-full items-center justify-center gap-2 rounded-xl border ${pl.bg} shadow-xs text-sm font-medium`}
+      >
         <span className="text-2xl">{pl.icon}</span>
       </div>
     );
@@ -161,16 +216,46 @@ function ItemVisualPreview({ item }: { item: PlantItem }) {
 
   // Effect
   const fxIcons: Record<string, { icon: string; label: string; bg: string }> = {
-    fx_none: { icon: "⚪", label: "Sin efecto", bg: "bg-secondary/70 border-border/50 text-muted-foreground" },
-    fx_leaves: { icon: "🍃", label: "Hojas flotantes", bg: "bg-emerald-500/15 text-emerald-600 border-emerald-500/30" },
-    fx_petals: { icon: "🌸", label: "Pétalos Sakura", bg: "bg-pink-500/15 text-pink-600 border-pink-500/30" },
-    fx_fireflies: { icon: "💡", label: "Luciérnagas vivas", bg: "bg-yellow-500/15 text-yellow-600 border-yellow-500/30" },
-    fx_aura: { icon: "🌀", label: "Aura de prosperidad", bg: "bg-cyan-500/15 text-cyan-600 border-cyan-500/30" },
-    fx_particles: { icon: "✨", label: "Polvo de oro", bg: "bg-amber-500/20 text-amber-600 border-amber-500/40" },
+    fx_none: {
+      icon: "⚪",
+      label: "Sin efecto",
+      bg: "bg-secondary/70 border-border/50 text-muted-foreground",
+    },
+    fx_leaves: {
+      icon: "🍃",
+      label: "Hojas flotantes",
+      bg: "bg-emerald-500/15 text-emerald-600 border-emerald-500/30",
+    },
+    fx_petals: {
+      icon: "🌸",
+      label: "Pétalos Sakura",
+      bg: "bg-pink-500/15 text-pink-600 border-pink-500/30",
+    },
+    fx_fireflies: {
+      icon: "💡",
+      label: "Luciérnagas vivas",
+      bg: "bg-yellow-500/15 text-yellow-600 border-yellow-500/30",
+    },
+    fx_aura: {
+      icon: "🌀",
+      label: "Aura de prosperidad",
+      bg: "bg-cyan-500/15 text-cyan-600 border-cyan-500/30",
+    },
+    fx_particles: {
+      icon: "✨",
+      label: "Polvo de oro",
+      bg: "bg-amber-500/20 text-amber-600 border-amber-500/40",
+    },
   };
-  const fx = fxIcons[item.code] ?? { icon: "✨", label: item.name, bg: "bg-secondary border-border" };
+  const fx = fxIcons[item.code] ?? {
+    icon: "✨",
+    label: item.name,
+    bg: "bg-secondary border-border",
+  };
   return (
-    <div className={`relative mb-3 flex h-14 w-full items-center justify-center gap-2 rounded-xl border ${fx.bg} shadow-xs text-xs font-semibold`}>
+    <div
+      className={`relative mb-3 flex h-14 w-full items-center justify-center gap-2 rounded-xl border ${fx.bg} shadow-xs text-xs font-semibold`}
+    >
       <span className="text-xl">{fx.icon}</span>
       <span>{fx.label}</span>
     </div>
@@ -178,6 +263,7 @@ function ItemVisualPreview({ item }: { item: PlantItem }) {
 }
 
 function Retos() {
+  const { t } = useTranslation();
   const { data: profile } = useProfile();
   const { data: txs = [] } = useTransactions();
   const { data: categories = [] } = useCategories();
@@ -190,7 +276,9 @@ function Retos() {
   const unlock = useUnlockItem();
 
   const [customOpen, setCustomOpen] = useState(false);
-  const [collectionTab, setCollectionTab] = useState<"plant" | "pot" | "background" | "effect">("plant");
+  const [collectionTab, setCollectionTab] = useState<"plant" | "pot" | "background" | "effect">(
+    "plant",
+  );
 
   // Estado para la vista previa en vivo en la pestaña Colección
   const [previewCodes, setPreviewCodes] = useState<{
@@ -269,9 +357,7 @@ function Retos() {
       return catItem?.code === item.code || m.plant_item_id === item.id;
     });
 
-    const categoryItemIds = catalog
-      .filter((c) => c.item_type === item.item_type)
-      .map((c) => c.id);
+    const categoryItemIds = catalog.filter((c) => c.item_type === item.item_type).map((c) => c.id);
 
     try {
       await equip.mutateAsync({
@@ -291,7 +377,9 @@ function Retos() {
 
   const handleUnlock = async (item: PlantItem) => {
     if (userPoints < item.unlock_points) {
-      toast.error(`Necesitas ${item.unlock_points} Growth Points. Te faltan ${item.unlock_points - userPoints} pts.`);
+      toast.error(
+        `Necesitas ${item.unlock_points} Growth Points. Te faltan ${item.unlock_points - userPoints} pts.`,
+      );
       return;
     }
 
@@ -330,7 +418,10 @@ function Retos() {
           <TabsTrigger value="historial" className="min-h-[40px] rounded-xl text-xs">
             Historial
           </TabsTrigger>
-          <TabsTrigger value="coleccion" className="min-h-[40px] rounded-xl text-xs font-semibold text-primary">
+          <TabsTrigger
+            value="coleccion"
+            className="min-h-[40px] rounded-xl text-xs font-semibold text-primary"
+          >
             ✨ Colección
           </TabsTrigger>
         </TabsList>
@@ -361,10 +452,13 @@ function Retos() {
         <TabsContent value="sugeridos" className="mt-4 space-y-3">
           <div className="rounded-2xl border border-primary/25 bg-primary/5 p-3.5 text-xs text-muted-foreground">
             <p className="flex items-center gap-1.5 font-semibold text-foreground">
-              <ShieldCheck className="h-4 w-4 text-primary" /> Retos Oficiales del Sistema (Fijos y no modificables)
+              <ShieldCheck className="h-4 w-4 text-primary" /> Retos Oficiales del Sistema (Fijos y
+              no modificables)
             </p>
             <p className="mt-1">
-              Estos retos están diseñados por la metodología de salud financiera y son los <strong>únicos que otorgan Growth Points</strong> para desbloquear elementos en la Colección.
+              Estos retos están diseñados por la metodología de salud financiera y son los{" "}
+              <strong>únicos que otorgan Growth Points</strong> para desbloquear elementos en la
+              Colección.
             </p>
           </div>
 
@@ -375,11 +469,18 @@ function Retos() {
               return (
                 <article key={i} className="surface space-y-3.5 p-4 transition-all">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <Badge variant="outline" className="border-primary/40 bg-primary/10 text-primary text-[11px] font-semibold">
+                    <Badge
+                      variant="outline"
+                      className="border-primary/40 bg-primary/10 text-primary text-[11px] font-semibold"
+                    >
                       🛡️ Reto del Sistema · No modificable
                     </Badge>
                     <Badge variant="secondary" className="h-fit shrink-0 text-[11px]">
-                      {s.difficulty === "easy" ? "Fácil" : s.difficulty === "medium" ? "Medio" : "Difícil"}
+                      {s.difficulty === "easy"
+                        ? "Fácil"
+                        : s.difficulty === "medium"
+                          ? "Medio"
+                          : "Difícil"}
                     </Badge>
                   </div>
 
@@ -442,9 +543,7 @@ function Retos() {
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Vista Previa Interactiva
               </span>
-              <span className="text-xs font-medium text-primary">
-                🌱 Saldo: {userPoints} pts
-              </span>
+              <span className="text-xs font-medium text-primary">🌱 Saldo: {userPoints} pts</span>
             </div>
 
             <div className="my-2">
@@ -545,11 +644,9 @@ function Retos() {
                         disabled={userPoints < previewItem.unlock_points}
                         onClick={() => handleUnlock(previewItem)}
                       >
-                        {userPoints >= previewItem.unlock_points ? (
-                          `Desbloquear (${previewItem.unlock_points} pts)`
-                        ) : (
-                          `Faltan ${previewItem.unlock_points - userPoints} pts`
-                        )}
+                        {userPoints >= previewItem.unlock_points
+                          ? `Desbloquear (${previewItem.unlock_points} pts)`
+                          : `Faltan ${previewItem.unlock_points - userPoints} pts`}
                       </Button>
                     )}
                   </div>
@@ -557,7 +654,8 @@ function Retos() {
               </div>
             ) : (
               <p className="mt-1 text-center text-xs text-muted-foreground">
-                Toca cualquier planta, maceta, fondo o efecto abajo para ver cómo lucirá en vivo antes de equiparlo.
+                Toca cualquier planta, maceta, fondo o efecto abajo para ver cómo lucirá en vivo
+                antes de equiparlo.
               </p>
             )}
           </div>
@@ -592,7 +690,8 @@ function Retos() {
                       const owned = isOwned(item);
                       const isEquipped = equippedCodes[item.item_type] === item.code;
                       const isPreviewing = currentDisplayCodes[item.item_type] === item.code;
-                      const rarity = RARITY_INFO[item.rarity as keyof typeof RARITY_INFO] ?? RARITY_INFO.common;
+                      const rarity =
+                        RARITY_INFO[item.rarity as keyof typeof RARITY_INFO] ?? RARITY_INFO.common;
 
                       return (
                         <div
@@ -661,7 +760,10 @@ function Retos() {
                               )}
                             </div>
 
-                            <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                            <div
+                              className="flex items-center gap-1.5"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <Button
                                 size="sm"
                                 variant={isPreviewing ? "default" : "outline"}
@@ -717,7 +819,13 @@ function Retos() {
 }
 
 /** Modal para crear retos personales propios (Autocontrol · 0 pts de tienda) */
-function CustomChallenge({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+function CustomChallenge({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
   const { data: categories = [] } = useCategories();
   const { data: profile } = useProfile();
   const { data: txs = [] } = useTransactions();
@@ -751,7 +859,9 @@ function CustomChallenge({ open, onOpenChange }: { open: boolean; onOpenChange: 
         </DrawerHeader>
         <div className="safe-bottom space-y-4 px-4 pb-6">
           <div className="rounded-xl border border-border bg-secondary/50 p-3 text-xs text-muted-foreground leading-relaxed">
-            💡 <strong>Reto de autocontrol personal:</strong> Te permite fijar tus propios límites de gasto mensual. Estos retos <strong>no generan Growth Points</strong> para la tienda, ya que los puntos están reservados para los Retos Oficiales del Sistema.
+            💡 <strong>Reto de autocontrol personal:</strong> Te permite fijar tus propios límites
+            de gasto mensual. Estos retos <strong>no generan Growth Points</strong> para la tienda,
+            ya que los puntos están reservados para los Retos Oficiales del Sistema.
           </div>
 
           <div>

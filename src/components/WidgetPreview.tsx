@@ -48,13 +48,7 @@ export function WidgetPreview({ config: controlledConfig, onConfigChange }: Prop
   };
 
   const [widgetData, setWidgetData] = useState<WidgetDataPayload>(() =>
-    computeWidgetData(
-      txs,
-      budgets,
-      challenges,
-      activeConfig,
-      profile?.base_currency ?? "COP",
-    ),
+    computeWidgetData(txs, budgets, challenges, activeConfig, profile?.base_currency ?? "COP"),
   );
 
   useEffect(() => {
@@ -169,7 +163,8 @@ export function WidgetPreview({ config: controlledConfig, onConfigChange }: Prop
             <div
               className="w-full max-w-[240px] aspect-square rounded-[26px] border border-[#23382b] bg-[#121c16]/95 p-4 text-white shadow-2xl flex flex-col justify-between select-none relative transition-transform hover:scale-[1.01]"
               style={{
-                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.4)",
+                boxShadow:
+                  "0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.4)",
               }}
             >
               {/* Header */}
@@ -201,7 +196,9 @@ export function WidgetPreview({ config: controlledConfig, onConfigChange }: Prop
                 ) : (
                   <div className="text-center py-2">
                     <span className="text-4xl block leading-none">{plantEmoji}</span>
-                    <p className="text-xs font-semibold text-emerald-300 mt-1">Salud: {score}/100</p>
+                    <p className="text-xs font-semibold text-emerald-300 mt-1">
+                      Salud: {score}/100
+                    </p>
                   </div>
                 )}
               </div>
@@ -230,7 +227,8 @@ export function WidgetPreview({ config: controlledConfig, onConfigChange }: Prop
             <div
               className="w-full max-w-[420px] rounded-[26px] border border-[#23382b] bg-[#121c16]/95 p-4 text-white shadow-2xl flex flex-col justify-between select-none relative transition-transform hover:scale-[1.01]"
               style={{
-                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.4)",
+                boxShadow:
+                  "0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.4)",
               }}
             >
               {/* Sección superior dividida en dos columnas */}
@@ -284,16 +282,14 @@ export function WidgetPreview({ config: controlledConfig, onConfigChange }: Prop
                   onClick={() => sheet.open("expense")}
                   className="flex items-center justify-center gap-1.5 rounded-xl bg-stone-800/90 hover:bg-stone-700/90 text-rose-300 py-2 px-3 text-xs font-semibold shadow transition-all active:scale-95 cursor-pointer border border-stone-700/40"
                 >
-                  <Minus className="h-3.5 w-3.5 text-rose-400 stroke-[2.5]" />
-                  + Gasto
+                  <Minus className="h-3.5 w-3.5 text-rose-400 stroke-[2.5]" />+ Gasto
                 </button>
                 <button
                   type="button"
                   onClick={() => sheet.open("income")}
                   className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-700/90 hover:bg-emerald-600/90 text-white py-2 px-3 text-xs font-semibold shadow transition-all active:scale-95 cursor-pointer border border-emerald-600/40"
                 >
-                  <Plus className="h-3.5 w-3.5 stroke-[2.5]" />
-                  + Ingreso
+                  <Plus className="h-3.5 w-3.5 stroke-[2.5]" />+ Ingreso
                 </button>
               </div>
             </div>
@@ -306,7 +302,8 @@ export function WidgetPreview({ config: controlledConfig, onConfigChange }: Prop
             <div
               className="w-full max-w-[420px] rounded-[26px] border border-[#23382b] bg-[#121c16]/95 p-4 text-white shadow-2xl flex flex-col justify-between select-none relative transition-transform hover:scale-[1.01] space-y-3"
               style={{
-                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.4)",
+                boxShadow:
+                  "0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.4)",
               }}
             >
               {/* Header con Salud */}

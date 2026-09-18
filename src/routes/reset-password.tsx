@@ -10,7 +10,10 @@ export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
       { title: "Restablecer contraseña — PlantWallet" },
-      { name: "description", content: "Define una nueva contraseña para tu cuenta de PlantWallet." },
+      {
+        name: "description",
+        content: "Define una nueva contraseña para tu cuenta de PlantWallet.",
+      },
       { property: "og:title", content: "Restablecer contraseña — PlantWallet" },
       { property: "og:description", content: "Define una nueva contraseña para tu cuenta." },
       { name: "robots", content: "noindex" },
@@ -43,11 +46,23 @@ function ResetPassword() {
         <h1 className="text-xl font-semibold">Nueva contraseña</h1>
         <div>
           <Label htmlFor="np">Contraseña</Label>
-          <Input id="np" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 h-12" />
+          <Input
+            id="np"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="mt-1 h-12"
+          />
         </div>
         <div>
           <Label htmlFor="nc">Confirmar contraseña</Label>
-          <Input id="nc" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className="mt-1 h-12" />
+          <Input
+            id="nc"
+            type="password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            className="mt-1 h-12"
+          />
         </div>
         <Button type="submit" className="h-13 w-full rounded-2xl py-3.5" disabled={busy}>
           Guardar contraseña

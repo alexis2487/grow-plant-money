@@ -21,13 +21,7 @@ const Sheet = ({
     });
   }, [open, onOpenChange]);
 
-  return (
-    <SheetPrimitive.Root
-      open={open}
-      onOpenChange={onOpenChange}
-      {...props}
-    />
-  );
+  return <SheetPrimitive.Root open={open} onOpenChange={onOpenChange} {...props} />;
 };
 
 const SheetTrigger = SheetPrimitive.Trigger;

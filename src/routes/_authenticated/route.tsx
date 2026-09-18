@@ -1,4 +1,11 @@
-import { createFileRoute, Link, Outlet, redirect, useNavigate, useRouterState } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  redirect,
+  useNavigate,
+  useRouterState,
+} from "@tanstack/react-router";
 import { createContext, useContext, useEffect, useState } from "react";
 import { Home, Wallet, BarChart3, Trophy, Settings, Plus, Minus } from "lucide-react";
 import { TransactionSheet } from "@/components/TransactionSheet";
@@ -9,6 +16,7 @@ import { registerBackHandler } from "@/lib/native";
 import { refreshAndSyncWidgets } from "@/lib/widget";
 import type { Transaction, TxType } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/i18n";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -27,15 +35,8 @@ interface SheetApi {
 const SheetContext = createContext<SheetApi>({ open: () => {} });
 export const useTransactionSheet = () => useContext(SheetContext);
 
-const NAV = [
-  { to: "/inicio", label: "Inicio", icon: Home },
-  { to: "/movimientos", label: "Movimientos", icon: Wallet },
-  { to: "/reportes", label: "Reportes", icon: BarChart3 },
-  { to: "/retos", label: "Retos", icon: Trophy },
-  { to: "/ajustes", label: "Ajustes", icon: Settings },
-] as const;
-
 function AppShell() {
+  const { t } = useTranslation();
   const { data: profile } = useProfile();
   const { isConfigured, isUnlocked, loading } = useAuth();
   const navigate = useNavigate();
@@ -44,6 +45,14 @@ function AppShell() {
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [fabOpen, setFabOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  const navItems = [
+    { to: "/inicio", label: t("nav.home"), icon: Home },
+    { to: "/movimientos", label: t("nav.transactions"), icon: Wallet },
+    { to: "/reportes", label: t("nav.reports"), icon: BarChart3 },
+    { to: "/retos", label: t("nav.challenges"), icon: Trophy },
+    { to: "/ajustes", label: t("nav.settings"), icon: Settings },
+  ];
 
   useEffect(() => {
     if (!loading && (!isConfigured || !isUnlocked)) {
@@ -163,7 +172,7 @@ function AppShell() {
             <span className="text-lg font-bold">PlantWallet</span>
           </div>
           <nav className="mt-8 flex flex-1 flex-col gap-1">
-            {NAV.map(({ to, label, icon: Icon }) => (
+            {navItems.map(({ to, label, icon: Icon }) => (
               <Link
                 key={to}
                 to={to}
@@ -184,13 +193,13 @@ function AppShell() {
               onClick={() => api.open("income")}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-secondary px-3 py-3 text-sm font-medium"
             >
-              <Plus className="h-4 w-4" aria-hidden /> Ingreso
+              <Plus className="h-4 w-4" aria-hidden /> {t("nav.addIncome")}
             </button>
             <button
               onClick={() => api.open("expense")}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-3 py-3 text-sm font-medium text-primary-foreground"
             >
-              <Minus className="h-4 w-4" aria-hidden /> Gasto
+              <Minus className="h-4 w-4" aria-hidden /> {t("nav.addExpense")}
             </button>
           </div>
         </aside>
@@ -218,30 +227,33 @@ function AppShell() {
                 onClick={() => api.open("income")}
                 className="animate-rise flex items-center gap-2 rounded-full bg-card px-4 py-3 text-sm font-medium shadow-lg"
               >
-                <Plus className="h-4 w-4 text-success" aria-hidden /> Añadir ingreso
+                <Plus className="h-4 w-4 text-success" aria-hidden /> {t("nav.addIncome")}
               </button>
               <button
                 onClick={() => api.open("expense")}
                 className="animate-rise flex items-center gap-2 rounded-full bg-card px-4 py-3 text-sm font-medium shadow-lg"
               >
-                <Minus className="h-4 w-4 text-danger" aria-hidden /> Añadir gasto
+                <Minus className="h-4 w-4 text-danger" aria-hidden /> {t("nav.addExpense")}
               </button>
             </>
           )}
           <button
             onClick={() => setFabOpen((v) => !v)}
-            aria-label="Añadir movimiento"
+            aria-label={t("nav.addMovement")}
             aria-expanded={fabOpen}
             className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl transition-transform active:scale-95"
           >
-            <Plus className={cn("h-7 w-7 transition-transform", fabOpen && "rotate-45")} aria-hidden />
+            <Plus
+              className={cn("h-7 w-7 transition-transform", fabOpen && "rotate-45")}
+              aria-hidden
+            />
           </button>
         </div>
 
         {/* Navegación inferior móvil */}
         <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 backdrop-blur md:hidden">
           <ul className="grid grid-cols-5">
-            {NAV.map(({ to, label, icon: Icon }) => (
+            {navItems.map(({ to, label, icon: Icon }) => (
               <li key={to}>
                 <Link
                   to={to}

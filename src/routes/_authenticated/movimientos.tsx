@@ -26,15 +26,19 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/u
 import { EmptyState } from "@/components/EmptyState";
 import { useTransactionSheet } from "./route";
 import { useCategories, useDeleteTransaction, useTransactions } from "@/lib/data";
-import { formatMoney, formatDate, paymentLabel } from "@/lib/format";
+import { paymentLabel } from "@/lib/format";
 import { shareFileNative } from "@/lib/native";
+import { useTranslation } from "@/i18n";
 import type { Transaction } from "@/lib/types";
 
 export const Route = createFileRoute("/_authenticated/movimientos")({
   head: () => ({
     meta: [
       { title: "Movimientos — PlantWallet" },
-      { name: "description", content: "Busca, filtra, edita y exporta todos tus ingresos y gastos." },
+      {
+        name: "description",
+        content: "Busca, filtra, edita y exporta todos tus ingresos y gastos.",
+      },
       { property: "og:title", content: "Movimientos — PlantWallet" },
       { property: "og:description", content: "Todos tus ingresos y gastos en un solo lugar." },
     ],
@@ -43,6 +47,7 @@ export const Route = createFileRoute("/_authenticated/movimientos")({
 });
 
 function Movimientos() {
+  const { t, formatMoney, formatDate } = useTranslation();
   const { data: txs = [], isLoading } = useTransactions();
   const { data: categories = [] } = useCategories();
   const del = useDeleteTransaction();
@@ -90,52 +95,55 @@ function Movimientos() {
     const csv = rows
       .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(";"))
       .join("\n");
-    const fileName = `plantwallet-movimientos-${new Date().toISOString().slice(0, 10)}.csv`;
+    const fileName = `${t("transactions.exportFileName")}${new Date().toISOString().slice(0, 10)}.csv`;
     await shareFileNative(
       fileName,
       `\uFEFF${csv}`,
-      "Reporte de Movimientos PlantWallet",
-      "Exportación de movimientos en formato CSV 🌱"
+      t("transactions.exportTitle"),
+      t("transactions.exportDesc"),
     );
   }
 
   return (
     <div className="space-y-4">
       <header className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">Movimientos</h1>
+        <h1 className="text-2xl font-bold">{t("transactions.title")}</h1>
         <Button variant="secondary" className="h-11 rounded-xl" onClick={exportCsv}>
-          Exportar CSV
+          {t("transactions.exportCsv")}
         </Button>
       </header>
 
       <div className="surface space-y-3 p-4">
         <div className="relative">
-          <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          <Search
+            className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            aria-hidden
+          />
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar por descripción o categoría"
+            placeholder={t("transactions.searchPlaceholder")}
             className="h-12 pl-9"
-            aria-label="Buscar movimientos"
+            aria-label={t("transactions.searchPlaceholder")}
           />
         </div>
         <div className="grid grid-cols-2 gap-2">
           <Select value={type} onValueChange={setType}>
-            <SelectTrigger className="!h-12" aria-label="Filtrar por tipo">
+            <SelectTrigger className="!h-12" aria-label={t("common.filter")}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="income">Ingresos</SelectItem>
-              <SelectItem value="expense">Gastos</SelectItem>
+              <SelectItem value="all">{t("transactions.filterAll")}</SelectItem>
+              <SelectItem value="income">{t("transactions.filterIncome")}</SelectItem>
+              <SelectItem value="expense">{t("transactions.filterExpense")}</SelectItem>
             </SelectContent>
           </Select>
           <Select value={cat} onValueChange={setCat}>
-            <SelectTrigger className="!h-12" aria-label="Filtrar por categoría">
+            <SelectTrigger className="!h-12" aria-label={t("common.category")}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todas las categorías</SelectItem>
+              <SelectItem value="all">{t("transactions.allCategories")}</SelectItem>
               {categories.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.emoji} {c.name}
@@ -143,8 +151,20 @@ function Movimientos() {
               ))}
             </SelectContent>
           </Select>
-          <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="h-12" aria-label="Desde" />
-          <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="h-12" aria-label="Hasta" />
+          <Input
+            type="date"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            className="h-12"
+            aria-label="Desde"
+          />
+          <Input
+            type="date"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            className="h-12"
+            aria-label="Hasta"
+          />
         </div>
       </div>
 
@@ -189,15 +209,15 @@ function Movimientos() {
       ) : (
         <EmptyState
           emoji="🌱"
-          title="No hay movimientos con estos filtros"
-          description="Cambia los filtros o registra un nuevo ingreso o gasto."
+          title={t("transactions.emptyTitle")}
+          description={t("transactions.emptyDescription")}
         />
       )}
 
       <Drawer open={!!detail} onOpenChange={(v) => !v && setDetail(null)}>
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>Detalle del movimiento</DrawerTitle>
+            <DrawerTitle>{t("transactions.detailTitle")}</DrawerTitle>
           </DrawerHeader>
           {detail && (
             <div className="safe-bottom space-y-4 px-4 pb-6">
@@ -206,18 +226,26 @@ function Movimientos() {
                 {formatMoney(Number(detail.amount), detail.currency)}
               </p>
               <dl className="space-y-2 text-sm">
-                <Row label="Tipo" value={detail.type === "income" ? "Ingreso" : "Gasto"} />
                 <Row
-                  label="Categoría"
+                  label={t("common.income") + "/" + t("common.expense")}
+                  value={detail.type === "income" ? t("common.income") : t("common.expense")}
+                />
+                <Row
+                  label={t("common.category")}
                   value={`${categories.find((c) => c.id === detail.category_id)?.emoji ?? ""} ${
-                    categories.find((c) => c.id === detail.category_id)?.name ?? "Sin categoría"
+                    categories.find((c) => c.id === detail.category_id)?.name ?? "—"
                   }`}
                 />
-                <Row label="Fecha" value={formatDate(detail.transaction_date, "long")} />
-                <Row label="Método de pago" value={paymentLabel(detail.payment_method)} />
-                <Row label="Descripción" value={detail.description || "—"} />
-                <Row label="Notas" value={detail.notes || "—"} />
-                {detail.is_recurring && <Row label="Recurrente" value={detail.recurring_rule ?? "sí"} />}
+                <Row label={t("common.date")} value={formatDate(detail.transaction_date, "long")} />
+                <Row
+                  label={t("common.paymentMethod")}
+                  value={paymentLabel(detail.payment_method)}
+                />
+                <Row label={t("common.description")} value={detail.description || "—"} />
+                <Row label={t("common.notes")} value={detail.notes || "—"} />
+                {detail.is_recurring && (
+                  <Row label={t("common.recurring")} value={detail.recurring_rule ?? "✓"} />
+                )}
               </dl>
               <div className="flex gap-2">
                 <Button
@@ -228,14 +256,16 @@ function Movimientos() {
                     setDetail(null);
                   }}
                 >
-                  <Pencil className="mr-2 h-4 w-4" aria-hidden /> Editar
+                  <Pencil className="mr-2 h-4 w-4" aria-hidden />{" "}
+                  {t("transactions.editTransaction")}
                 </Button>
                 <Button
                   variant="destructive"
                   className="h-12 flex-1 rounded-xl"
                   onClick={() => setToDelete(detail.id)}
                 >
-                  <Trash2 className="mr-2 h-4 w-4" aria-hidden /> Eliminar
+                  <Trash2 className="mr-2 h-4 w-4" aria-hidden />{" "}
+                  {t("transactions.deleteTransaction")}
                 </Button>
               </div>
             </div>
@@ -246,23 +276,21 @@ function Movimientos() {
       <AlertDialog open={!!toDelete} onOpenChange={(v) => !v && setToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar este movimiento?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Se recalcularán tu balance, tu salud financiera y el progreso de tus retos.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t("transactions.confirmDeleteTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("transactions.confirmDeleteDesc")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={async () => {
                 if (!toDelete) return;
                 await del.mutateAsync(toDelete);
                 setToDelete(null);
                 setDetail(null);
-                toast.success("Movimiento eliminado correctamente");
+                toast.success(t("transactions.deletedSuccess"));
               }}
             >
-              Eliminar
+              {t("common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

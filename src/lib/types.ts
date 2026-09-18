@@ -44,6 +44,7 @@ export interface Profile {
   avatar_url: string | null;
   base_currency: string;
   theme: string;
+  language?: string;
   date_format: string;
   week_start: number;
   growth_points: number;

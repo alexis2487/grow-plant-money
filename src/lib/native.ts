@@ -39,7 +39,7 @@ export function setBiometricEnabled(enabled: boolean): void {
 }
 
 export async function promptBiometricAuth(
-  reason: string = "Accede a tus finanzas de forma segura"
+  reason: string = "Accede a tus finanzas de forma segura",
 ): Promise<boolean> {
   if (!Capacitor.isNativePlatform()) return false;
   try {
@@ -68,12 +68,14 @@ export async function shareFileNative(
   filename: string,
   content: string,
   title: string,
-  text: string
+  text: string,
 ): Promise<boolean> {
   if (!Capacitor.isNativePlatform()) {
     try {
       const isJson = filename.endsWith(".json");
-      const blob = new Blob([content], { type: isJson ? "application/json" : "text/csv;charset=utf-8;" });
+      const blob = new Blob([content], {
+        type: isJson ? "application/json" : "text/csv;charset=utf-8;",
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -116,7 +118,10 @@ export function isReminderNotificationEnabled(): boolean {
   return localStorage.getItem(NOTIFICATIONS_STORAGE_KEY) === "true";
 }
 
-export async function scheduleDailyReminder(hour: number = 20, minute: number = 0): Promise<boolean> {
+export async function scheduleDailyReminder(
+  hour: number = 20,
+  minute: number = 0,
+): Promise<boolean> {
   if (!Capacitor.isNativePlatform()) {
     localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, "true");
     return true;
@@ -213,7 +218,7 @@ export function setupBackButtonListener(): () => void {
           which: 27,
           bubbles: true,
           cancelable: true,
-        })
+        }),
       );
       return;
     }
@@ -241,4 +246,3 @@ export function setupBackButtonListener(): () => void {
     listenerPromise.then((sub) => sub.remove());
   };
 }
-

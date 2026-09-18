@@ -117,8 +117,7 @@ export function computeWidgetData(
     selectedChallenge = challenges.find((c) => c.id === config.selectedGoalId);
   }
   if (!selectedChallenge) {
-    selectedChallenge =
-      challenges.find((c) => c.status === "active") ?? challenges[0];
+    selectedChallenge = challenges.find((c) => c.status === "active") ?? challenges[0];
   }
 
   let goalTitle = "Meta de ahorro";
@@ -159,12 +158,12 @@ export function computeWidgetData(
 
 export interface PlantWalletWidgetPluginInterface {
   updateWidgetData(data: WidgetDataPayload): Promise<{ success: boolean }>;
-  pinWidget(options: { widgetType: "compact" | "summary" | "goals" }): Promise<{ supported: boolean; requested?: boolean; message?: string }>;
+  pinWidget(options: {
+    widgetType: "compact" | "summary" | "goals";
+  }): Promise<{ supported: boolean; requested?: boolean; message?: string }>;
 }
 
-const PlantWalletWidget = registerPlugin<PlantWalletWidgetPluginInterface>(
-  "PlantWalletWidget",
-);
+const PlantWalletWidget = registerPlugin<PlantWalletWidgetPluginInterface>("PlantWalletWidget");
 
 export async function pinNativeWidget(
   widgetType: "compact" | "summary" | "goals",
@@ -174,7 +173,8 @@ export async function pinNativeWidget(
   } catch {
     return {
       supported: false,
-      message: "Para añadir el widget, mantén presionada la pantalla de inicio de tu teléfono, selecciona 'Widgets' y busca 'PlantWallet'.",
+      message:
+        "Para añadir el widget, mantén presionada la pantalla de inicio de tu teléfono, selecciona 'Widgets' y busca 'PlantWallet'.",
     };
   }
 }
@@ -182,9 +182,7 @@ export async function pinNativeWidget(
 export async function syncNativeWidgets(payload: WidgetDataPayload): Promise<void> {
   // Notificar al simulador / componentes reactivos dentro de la app web/móvil
   if (typeof window !== "undefined") {
-    window.dispatchEvent(
-      new CustomEvent("plantwallet:widget-updated", { detail: payload }),
-    );
+    window.dispatchEvent(new CustomEvent("plantwallet:widget-updated", { detail: payload }));
   }
 
   // Notificar al widget nativo en Android (mediante Capacitor Plugin)

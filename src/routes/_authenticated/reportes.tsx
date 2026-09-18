@@ -28,8 +28,9 @@ import {
   monthlySeries,
   totalsFor,
 } from "@/lib/finance";
-import { formatMoney, monthLabel, monthRange } from "@/lib/format";
+import { monthRange } from "@/lib/format";
 import { buildReportHtml } from "@/lib/report";
+import { useTranslation } from "@/i18n";
 
 export const Route = createFileRoute("/_authenticated/reportes")({
   head: () => ({
@@ -37,10 +38,14 @@ export const Route = createFileRoute("/_authenticated/reportes")({
       { title: "Reportes — PlantWallet" },
       {
         name: "description",
-        content: "Reportes financieros independientes de débito y tarjeta de crédito, categorías y PDF exportable.",
+        content:
+          "Reportes financieros independientes de débito y tarjeta de crédito, categorías y PDF exportable.",
       },
       { property: "og:title", content: "Reportes — PlantWallet" },
-      { property: "og:description", content: "Analiza tus finanzas en débito y tarjeta de crédito mes a mes." },
+      {
+        property: "og:description",
+        content: "Analiza tus finanzas en débito y tarjeta de crédito mes a mes.",
+      },
     ],
   }),
   component: Reportes,
@@ -55,6 +60,7 @@ const CHART_COLORS = [
 ];
 
 function Reportes() {
+  const { t, formatMoney, monthLabel } = useTranslation();
   const { data: profile } = useProfile();
   const { data: txs = [] } = useTransactions();
   const { data: categories = [] } = useCategories();
@@ -71,7 +77,10 @@ function Reportes() {
     return txs.filter((t) => (reportType === "credit" ? isCreditTx(t) : !isCreditTx(t)));
   }, [txs, reportType]);
 
-  const totals = useMemo(() => totalsFor(txs, range.start, range.end), [txs, range.start, range.end]);
+  const totals = useMemo(
+    () => totalsFor(txs, range.start, range.end),
+    [txs, range.start, range.end],
+  );
   const prevTotals = useMemo(() => {
     const r = monthRange(offset - 1);
     return totalsFor(txs, r.start, r.end);
@@ -83,7 +92,10 @@ function Reportes() {
   );
 
   const months = useMemo(() => monthlySeries(txs, 6, reportType), [txs, reportType]);
-  const daily = useMemo(() => dailySeries(filteredTxs, range.start, range.end), [filteredTxs, range.start, range.end]);
+  const daily = useMemo(
+    () => dailySeries(filteredTxs, range.start, range.end),
+    [filteredTxs, range.start, range.end],
+  );
   const health = useMemo(() => computeHealth(txs, budgets, categories), [txs, budgets, categories]);
 
   // Cálculos específicos para el reporte activo (evitar bug de zona horaria UTC con parseInt)
@@ -98,9 +110,7 @@ function Reportes() {
   const prevExpense = isCredit ? prevTotals.credit.expense : prevTotals.debit.expense;
   const avgDaily = currentExpense / daysInMonth;
   const variation =
-    prevExpense > 0
-      ? Math.round(((currentExpense - prevExpense) / prevExpense) * 100)
-      : 0;
+    prevExpense > 0 ? Math.round(((currentExpense - prevExpense) / prevExpense) * 100) : 0;
 
   function exportPdf() {
     const html = buildReportHtml({
@@ -165,7 +175,11 @@ function Reportes() {
 
       {/* NAVEGACIÓN ENTRE MESES */}
       <div className="flex gap-2">
-        <Button variant="secondary" className="h-11 flex-1 rounded-xl" onClick={() => setOffset((o) => o - 1)}>
+        <Button
+          variant="secondary"
+          className="h-11 flex-1 rounded-xl"
+          onClick={() => setOffset((o) => o - 1)}
+        >
           ← Mes anterior
         </Button>
         <Button
@@ -181,8 +195,16 @@ function Reportes() {
       {/* TARJETAS KPI ADAPTADAS */}
       {isCredit ? (
         <section className="grid grid-cols-2 gap-3">
-          <Kpi label="Compras con crédito" value={formatMoney(totals.credit.expense, currency)} highlight="warning" />
-          <Kpi label="Pagos a la tarjeta" value={formatMoney(totals.credit.income, currency)} highlight="success" />
+          <Kpi
+            label="Compras con crédito"
+            value={formatMoney(totals.credit.expense, currency)}
+            highlight="warning"
+          />
+          <Kpi
+            label="Pagos a la tarjeta"
+            value={formatMoney(totals.credit.income, currency)}
+            highlight="success"
+          />
           <Kpi label="Saldo adeudado neto" value={formatMoney(totals.credit.balance, currency)} />
           <Kpi label="Movimientos a crédito" value={`${totals.credit.count} movimientos`} />
           <Kpi label="Consumo diario promedio" value={formatMoney(avgDaily, currency)} />
@@ -193,10 +215,18 @@ function Reportes() {
         </section>
       ) : (
         <section className="grid grid-cols-2 gap-3">
-          <Kpi label="Ingresos líquidos" value={formatMoney(totals.debit.income, currency)} highlight="success" />
+          <Kpi
+            label="Ingresos líquidos"
+            value={formatMoney(totals.debit.income, currency)}
+            highlight="success"
+          />
           <Kpi label="Gastos en débito" value={formatMoney(totals.debit.expense, currency)} />
           <Kpi label="Balance del mes" value={formatMoney(totals.debit.balance, currency)} />
-          <Kpi label="Tasa de ahorro" value={`${Math.round(totals.debit.savingsRate * 100)}%`} highlight="success" />
+          <Kpi
+            label="Tasa de ahorro"
+            value={`${Math.round(totals.debit.savingsRate * 100)}%`}
+            highlight="success"
+          />
           <Kpi label="Gasto diario promedio" value={formatMoney(avgDaily, currency)} />
           <Kpi
             label="Variación vs mes anterior"
@@ -208,7 +238,9 @@ function Reportes() {
       {currentCount === 0 ? (
         <EmptyState
           emoji={isCredit ? "💳" : "📊"}
-          title={isCredit ? "Sin compras a crédito en este mes" : "Sin movimientos en débito en este mes"}
+          title={
+            isCredit ? "Sin compras a crédito en este mes" : "Sin movimientos en débito en este mes"
+          }
           description={
             isCredit
               ? "No se han registrado consumos con tarjeta de crédito en este período."
@@ -220,7 +252,9 @@ function Reportes() {
           {/* GRÁFICO HISTÓRICO 6 MESES */}
           <section className="surface p-4">
             <h2 className="text-base font-semibold">
-              {isCredit ? "Compras a crédito vs Pagos (6 meses)" : "Ingresos vs gastos en débito (6 meses)"}
+              {isCredit
+                ? "Compras a crédito vs Pagos (6 meses)"
+                : "Ingresos vs gastos en débito (6 meses)"}
             </h2>
             <div className="mt-3 h-56 w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -232,13 +266,33 @@ function Reportes() {
                   />
                   {isCredit ? (
                     <>
-                      <Bar dataKey="expense" name="Compras a Crédito" fill="hsl(var(--warning))" radius={[6, 6, 0, 0]} />
-                      <Bar dataKey="income" name="Pagos / Abonos" fill="hsl(var(--success))" radius={[6, 6, 0, 0]} />
+                      <Bar
+                        dataKey="expense"
+                        name="Compras a Crédito"
+                        fill="hsl(var(--warning))"
+                        radius={[6, 6, 0, 0]}
+                      />
+                      <Bar
+                        dataKey="income"
+                        name="Pagos / Abonos"
+                        fill="hsl(var(--success))"
+                        radius={[6, 6, 0, 0]}
+                      />
                     </>
                   ) : (
                     <>
-                      <Bar dataKey="income" name="Ingresos Débito" fill="var(--chart-1)" radius={[6, 6, 0, 0]} />
-                      <Bar dataKey="expense" name="Gastos Débito" fill="var(--chart-4)" radius={[6, 6, 0, 0]} />
+                      <Bar
+                        dataKey="income"
+                        name="Ingresos Débito"
+                        fill="var(--chart-1)"
+                        radius={[6, 6, 0, 0]}
+                      />
+                      <Bar
+                        dataKey="expense"
+                        name="Gastos Débito"
+                        fill="var(--chart-4)"
+                        radius={[6, 6, 0, 0]}
+                      />
                     </>
                   )}
                 </BarChart>
@@ -296,14 +350,18 @@ function Reportes() {
                 </ol>
               </>
             ) : (
-              <p className="mt-2 text-sm text-muted-foreground">No hay categorías registradas en este período.</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                No hay categorías registradas en este período.
+              </p>
             )}
           </section>
 
           {/* GRÁFICO DIARIO */}
           <section className="surface p-4">
             <h2 className="text-base font-semibold">
-              {isCredit ? "Consumo diario con tarjeta de crédito" : "Gasto diario del mes en débito"}
+              {isCredit
+                ? "Consumo diario con tarjeta de crédito"
+                : "Gasto diario del mes en débito"}
             </h2>
             <div className="mt-3 h-48 w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -315,13 +373,41 @@ function Reportes() {
                   />
                   {isCredit ? (
                     <>
-                      <Line type="monotone" dataKey="expense" name="Compras a Crédito" stroke="hsl(var(--warning))" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="income" name="Pagos Tarjeta" stroke="hsl(var(--success))" strokeWidth={2} dot={false} />
+                      <Line
+                        type="monotone"
+                        dataKey="expense"
+                        name="Compras a Crédito"
+                        stroke="hsl(var(--warning))"
+                        strokeWidth={2}
+                        dot={false}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="income"
+                        name="Pagos Tarjeta"
+                        stroke="hsl(var(--success))"
+                        strokeWidth={2}
+                        dot={false}
+                      />
                     </>
                   ) : (
                     <>
-                      <Line type="monotone" dataKey="expense" name="Gastos Débito" stroke="var(--chart-4)" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="income" name="Ingresos Débito" stroke="var(--chart-1)" strokeWidth={2} dot={false} />
+                      <Line
+                        type="monotone"
+                        dataKey="expense"
+                        name="Gastos Débito"
+                        stroke="var(--chart-4)"
+                        strokeWidth={2}
+                        dot={false}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="income"
+                        name="Ingresos Débito"
+                        stroke="var(--chart-1)"
+                        strokeWidth={2}
+                        dot={false}
+                      />
                     </>
                   )}
                 </LineChart>
@@ -348,11 +434,7 @@ function Kpi({
       <p className="text-xs text-muted-foreground">{label}</p>
       <p
         className={`mt-1 text-lg font-semibold tabular-nums ${
-          highlight === "success"
-            ? "text-success"
-            : highlight === "warning"
-              ? "text-warning"
-              : ""
+          highlight === "success" ? "text-success" : highlight === "warning" ? "text-warning" : ""
         }`}
       >
         {value}

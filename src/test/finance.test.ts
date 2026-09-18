@@ -16,9 +16,39 @@ import type { Budget, Category, Transaction } from "../lib/types";
 import { monthRange } from "../lib/format";
 
 const MOCK_CATEGORIES: Category[] = [
-  { id: "cat_food", user_id: "u1", name: "Alimentación", emoji: "🍔", type: "expense", is_essential: true, is_active: true, color: null, description: null },
-  { id: "cat_sal", user_id: "u1", name: "Salario", emoji: "💼", type: "income", is_essential: true, is_active: true, color: null, description: null },
-  { id: "cat_fun", user_id: "u1", name: "Ocio", emoji: "🎮", type: "expense", is_essential: false, is_active: true, color: null, description: null },
+  {
+    id: "cat_food",
+    user_id: "u1",
+    name: "Alimentación",
+    emoji: "🍔",
+    type: "expense",
+    is_essential: true,
+    is_active: true,
+    color: null,
+    description: null,
+  },
+  {
+    id: "cat_sal",
+    user_id: "u1",
+    name: "Salario",
+    emoji: "💼",
+    type: "income",
+    is_essential: true,
+    is_active: true,
+    color: null,
+    description: null,
+  },
+  {
+    id: "cat_fun",
+    user_id: "u1",
+    name: "Ocio",
+    emoji: "🎮",
+    type: "expense",
+    is_essential: false,
+    is_active: true,
+    color: null,
+    description: null,
+  },
 ];
 
 describe("finance.ts - Suite de Pruebas de Salud y Finanzas", () => {

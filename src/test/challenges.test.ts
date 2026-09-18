@@ -1,10 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  nextDifficulty,
-  suggestChallenges,
-  challengeProgress,
-  daysLeft,
-} from "../lib/challenges";
+import { nextDifficulty, suggestChallenges, challengeProgress, daysLeft } from "../lib/challenges";
 import type { Category, Transaction, UserChallenge } from "../lib/types";
 
 describe("challenges.ts - Suite de Pruebas de Retos", () => {
@@ -78,8 +73,28 @@ describe("challenges.ts - Suite de Pruebas de Retos", () => {
 
   describe("suggestChallenges", () => {
     const categories: Category[] = [
-      { id: "c_rest", user_id: "u1", name: "Restaurantes", emoji: "🍽️", type: "expense", is_essential: false, is_active: true, color: null, description: null },
-      { id: "c_sal", user_id: "u1", name: "Salario", emoji: "💼", type: "income", is_essential: true, is_active: true, color: null, description: null },
+      {
+        id: "c_rest",
+        user_id: "u1",
+        name: "Restaurantes",
+        emoji: "🍽️",
+        type: "expense",
+        is_essential: false,
+        is_active: true,
+        color: null,
+        description: null,
+      },
+      {
+        id: "c_sal",
+        user_id: "u1",
+        name: "Salario",
+        emoji: "💼",
+        type: "income",
+        is_essential: true,
+        is_active: true,
+        color: null,
+        description: null,
+      },
     ];
 
     it("genera sugerencias oficiales del sistema y no supera 8", () => {
@@ -115,7 +130,9 @@ describe("challenges.ts - Suite de Pruebas de Retos", () => {
       };
 
       const newSuggestions = suggestChallenges([], categories, [activeChallenge]);
-      expect(newSuggestions.some((s) => s.title.toLowerCase() === first.title.toLowerCase())).toBe(false);
+      expect(newSuggestions.some((s) => s.title.toLowerCase() === first.title.toLowerCase())).toBe(
+        false,
+      );
     });
   });
 });

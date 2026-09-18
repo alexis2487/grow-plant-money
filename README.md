@@ -1,5 +1,6 @@
 # PlantWallet 🌱
-> *Cultiva mejor tus finanzas.*
+
+> _Cultiva mejor tus finanzas._
 
 **PlantWallet** es una aplicación móvil de gestión de finanzas personales diseñada exclusivamente para dispositivos móviles (Android).
 
@@ -13,7 +14,7 @@ La finalidad de PlantWallet es proporcionar una experiencia privada, intuitiva y
 
 - **Medición de salud financiera:** Evaluación en tiempo real a través de un indicador ponderado (0 a 100) que analiza capacidad de ahorro, relación ingresos/gastos, cumplimiento de presupuestos, tendencia mensual y estabilidad.
 - **Gestión dual Débito vs. Crédito:** Separación de flujos de efectivo líquido frente a consumos en tarjeta de crédito, previniendo falsas lecturas de liquidez.
-- **Retos adaptativos y gamificación:** Desafíos financieros inteligentes basados en los hábitos de consumo del usuario, los cuales otorgan puntos de crecimiento (*Growth Points*) para desbloquear plantas, macetas, fondos ambientales y efectos visuales en su jardín digital.
+- **Retos adaptativos y gamificación:** Desafíos financieros inteligentes basados en los hábitos de consumo del usuario, los cuales otorgan puntos de crecimiento (_Growth Points_) para desbloquear plantas, macetas, fondos ambientales y efectos visuales en su jardín digital.
 - **Enfoque Offline-First y privacidad:** Operación local sin dependencia obligatoria de la nube, con autenticación por PIN y soporte para biometría nativa (huella dactilar y reconocimiento facial).
 - **Análisis y reportería:** Visualización analítica de gastos por categorías, detección de transacciones recurrentes y exportación de informes en formatos PDF y CSV compatibles con hojas de cálculo.
 

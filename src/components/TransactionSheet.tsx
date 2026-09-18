@@ -13,8 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CURRENCIES, PAYMENT_METHODS, formatMoney, isoDate, parseAmount } from "@/lib/format";
+import { CURRENCIES, PAYMENT_METHODS, isoDate, parseAmount } from "@/lib/format";
 import { useCategories, useProfile, useSaveTransaction } from "@/lib/data";
+import { useTranslation } from "@/i18n";
 import type { Transaction, TxType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +27,7 @@ interface Props {
 }
 
 export function TransactionSheet({ open, onOpenChange, type, editing }: Props) {
+  const { t, formatMoney } = useTranslation();
   const { data: profile } = useProfile();
   const { data: categories = [] } = useCategories();
   const save = useSaveTransaction();
@@ -72,8 +74,8 @@ export function TransactionSheet({ open, onOpenChange, type, editing }: Props) {
   const value = parseAmount(amount);
 
   async function handleSave() {
-    if (value <= 0) return toast.error("Escribe un valor mayor que cero.");
-    if (!categoryId) return toast.error("Elige una categoría.");
+    if (value <= 0) return toast.error(t("transactions.valAmountPositive"));
+    if (!categoryId) return toast.error(t("transactions.valCategoryRequired"));
     try {
       await save.mutateAsync({
         id: editing?.id,
@@ -90,14 +92,14 @@ export function TransactionSheet({ open, onOpenChange, type, editing }: Props) {
       });
       toast.success(
         editing
-          ? "¡Movimiento actualizado con éxito! ✨"
+          ? t("transactions.updatedSuccess")
           : kind === "income"
-            ? "¡Ingreso registrado! Tu planta florece 🌱"
-            : "¡Gasto registrado con éxito! 🌿",
+            ? t("transactions.createdIncomeSuccess")
+            : t("transactions.createdExpenseSuccess"),
       );
       onOpenChange(false);
     } catch {
-      toast.error("No se pudo guardar el movimiento. Inténtalo de nuevo.");
+      toast.error(t("transactions.saveError"));
     }
   }
 
@@ -106,7 +108,11 @@ export function TransactionSheet({ open, onOpenChange, type, editing }: Props) {
       <DrawerContent className="max-h-[92vh]">
         <DrawerHeader className="pb-2">
           <DrawerTitle>
-            {editing ? "Editar movimiento" : kind === "income" ? "Añadir ingreso" : "Añadir gasto"}
+            {editing
+              ? t("transactions.editTransaction")
+              : kind === "income"
+                ? t("nav.addIncome")
+                : t("nav.addExpense")}
           </DrawerTitle>
         </DrawerHeader>
 
@@ -167,7 +173,12 @@ export function TransactionSheet({ open, onOpenChange, type, editing }: Props) {
                 className="mt-1 h-12"
               />
               <div className="mt-2 flex gap-2">
-                <Button type="button" variant="secondary" size="sm" onClick={() => setDate(isoDate(new Date()))}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setDate(isoDate(new Date()))}
+                >
                   Hoy
                 </Button>
                 <Button
@@ -245,9 +256,15 @@ export function TransactionSheet({ open, onOpenChange, type, editing }: Props) {
               <div className="flex items-center justify-between rounded-2xl border border-border p-3">
                 <div>
                   <p className="text-sm font-medium">Este movimiento se repite</p>
-                  <p className="text-xs text-muted-foreground">Guarda la frecuencia para tus recurrentes.</p>
+                  <p className="text-xs text-muted-foreground">
+                    Guarda la frecuencia para tus recurrentes.
+                  </p>
                 </div>
-                <Switch checked={recurring} onCheckedChange={setRecurring} aria-label="Movimiento recurrente" />
+                <Switch
+                  checked={recurring}
+                  onCheckedChange={setRecurring}
+                  aria-label="Movimiento recurrente"
+                />
               </div>
               {recurring && (
                 <Select value={rule} onValueChange={setRule}>

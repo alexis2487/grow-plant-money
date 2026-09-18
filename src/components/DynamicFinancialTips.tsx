@@ -221,9 +221,7 @@ export function DynamicFinancialTips() {
 
       {/* Contenido principal del consejo con animación fluida */}
       <div key={currentTip.id} className="mt-3.5 animate-in fade-in duration-300">
-        <h3 className="text-sm font-bold text-foreground leading-snug">
-          {currentTip.title}
-        </h3>
+        <h3 className="text-sm font-bold text-foreground leading-snug">{currentTip.title}</h3>
         <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
           {currentTip.description}
         </p>

@@ -32,7 +32,9 @@ const REDUCTION_BY_DIFFICULTY: Record<Difficulty, number> = {
 
 /** Dificultad adaptativa: sube si el usuario completa, baja si falla. */
 export function nextDifficulty(history: UserChallenge[]): Difficulty {
-  const finished = history.filter((c) => c.status === "completed" || c.status === "failed").slice(0, 5);
+  const finished = history
+    .filter((c) => c.status === "completed" || c.status === "failed")
+    .slice(0, 5);
   if (!finished.length) return "easy";
   const completed = finished.filter((c) => c.status === "completed").length;
   const rate = completed / finished.length;
@@ -118,7 +120,12 @@ export function suggestChallenges(
       // Reto de ahorro: basar en ingresos recientes si existen
       const lastMonth = monthRange(-1);
       const recentIncome = sum(
-        txs.filter((t) => t.type === "income" && t.transaction_date >= lastMonth.start && t.transaction_date <= lastMonth.end),
+        txs.filter(
+          (t) =>
+            t.type === "income" &&
+            t.transaction_date >= lastMonth.start &&
+            t.transaction_date <= lastMonth.end,
+        ),
       );
       if (recentIncome > 0) {
         target = Math.round((recentIncome * 0.2) / 1000) * 1000 || 100000;
@@ -153,7 +160,9 @@ export function suggestChallenges(
   }
 
   // 2. Retos dinámicos basados en gasto alto en categorías no esenciales
-  const discretionary = categories.filter((c) => c.type === "expense" && !c.is_essential && c.is_active);
+  const discretionary = categories.filter(
+    (c) => c.type === "expense" && !c.is_essential && c.is_active,
+  );
   const reduction = REDUCTION_BY_DIFFICULTY[difficulty];
 
   for (const cat of discretionary) {

@@ -78,7 +78,8 @@ export const FULL_CATALOG: PlantItem[] = [
     id: "pi_plant_carnivorous",
     code: "plant_carnivorous",
     name: "Planta Exótica Tropical",
-    description: "Cáliz carmesí luminiscente con destellos de rocío y tonalidades de selva profunda.",
+    description:
+      "Cáliz carmesí luminiscente con destellos de rocío y tonalidades de selva profunda.",
     item_type: "plant",
     rarity: "legendary",
     unlock_points: 200,
@@ -87,7 +88,8 @@ export const FULL_CATALOG: PlantItem[] = [
     id: "pi_plant_tree",
     code: "plant_tree",
     name: "Árbol de la Abundancia",
-    description: "Copa dorada radiante con hojas que resplandecen como monedas de oro y esmeraldas.",
+    description:
+      "Copa dorada radiante con hojas que resplandecen como monedas de oro y esmeraldas.",
     item_type: "plant",
     rarity: "legendary",
     unlock_points: 300,
@@ -134,7 +136,8 @@ export const FULL_CATALOG: PlantItem[] = [
     id: "pi_pot_crystal",
     code: "pot_crystal",
     name: "Terrario de Cuarzo",
-    description: "Vidrio cristalino biselado que deja ver estratos de cuarzo blanco y tierra fértil.",
+    description:
+      "Vidrio cristalino biselado que deja ver estratos de cuarzo blanco y tierra fértil.",
     item_type: "pot",
     rarity: "epic",
     unlock_points: 150,
@@ -272,7 +275,8 @@ export const SYSTEM_CHALLENGES: SystemChallengeTemplate[] = [
   {
     id: "sys_no_leisure",
     title: "🎮 1 mes sin gastos en Ocio y Salidas",
-    description: "Elimina los gastos en bares, cine, ocio y salidas nocturnas durante 30 días para impulsar tu fondo de ahorro.",
+    description:
+      "Elimina los gastos en bares, cine, ocio y salidas nocturnas durante 30 días para impulsar tu fondo de ahorro.",
     category_hint: ["Entretenimiento", "Ocio", "Salidas", "Bares", "Juegos"],
     challenge_type: "limit",
     difficulty: "medium",
@@ -284,7 +288,8 @@ export const SYSTEM_CHALLENGES: SystemChallengeTemplate[] = [
   {
     id: "sys_no_delivery",
     title: "🍔 Mes Cero Domicilios y Restaurantes",
-    description: "Cocina en casa y prepara tus comidas. No incurras en compras de apps de delivery ni restaurantes.",
+    description:
+      "Cocina en casa y prepara tus comidas. No incurras en compras de apps de delivery ni restaurantes.",
     category_hint: ["Restaurantes", "Comida", "Domicilios", "Alimentación"],
     challenge_type: "limit",
     difficulty: "medium",
@@ -296,7 +301,8 @@ export const SYSTEM_CHALLENGES: SystemChallengeTemplate[] = [
   {
     id: "sys_impulse_detox",
     title: "🛍️ 15 días detox de compras impulsivas",
-    description: "Pausa total en ropa, calzado, tecnología y compras no esenciales durante 15 días.",
+    description:
+      "Pausa total en ropa, calzado, tecnología y compras no esenciales durante 15 días.",
     category_hint: ["Compras", "Ropa", "Tecnología", "Otros"],
     challenge_type: "limit",
     difficulty: "easy",
@@ -308,7 +314,8 @@ export const SYSTEM_CHALLENGES: SystemChallengeTemplate[] = [
   {
     id: "sys_savings_rate",
     title: "🌱 Cosecha de Ahorro: 20% en débito",
-    description: "Cierra el mes ahorrando al menos el 20% de tus ingresos líquidos sin tocar tu saldo de reserva.",
+    description:
+      "Cierra el mes ahorrando al menos el 20% de tus ingresos líquidos sin tocar tu saldo de reserva.",
     category_hint: [],
     challenge_type: "saving",
     difficulty: "hard",
@@ -319,7 +326,8 @@ export const SYSTEM_CHALLENGES: SystemChallengeTemplate[] = [
   {
     id: "sys_transport_control",
     title: "🚗 Control de Movilidad y Taxis",
-    description: "Optimizemos desplazamientos: usa transporte público o camina y mantén tus taxis al mínimo este mes.",
+    description:
+      "Optimizemos desplazamientos: usa transporte público o camina y mantén tus taxis al mínimo este mes.",
     category_hint: ["Transporte", "Combustible", "Taxis", "Movilidad"],
     challenge_type: "limit",
     difficulty: "easy",
@@ -330,7 +338,8 @@ export const SYSTEM_CHALLENGES: SystemChallengeTemplate[] = [
   {
     id: "sys_reserve_fund",
     title: "🏦 Fondo de Reserva: Balance en Verde",
-    description: "Mantén tu balance de débito en positivo durante todo el mes sin registrar sobregiros ni saldos en rojo.",
+    description:
+      "Mantén tu balance de débito en positivo durante todo el mes sin registrar sobregiros ni saldos en rojo.",
     category_hint: [],
     challenge_type: "saving",
     difficulty: "medium",
@@ -341,7 +350,8 @@ export const SYSTEM_CHALLENGES: SystemChallengeTemplate[] = [
   {
     id: "sys_subscriptions_audit",
     title: "📱 Auditoría de Suscripciones Innecesarias",
-    description: "Identifica y cancela servicios recurrentes que no uses con frecuencia para liberar flujo de caja.",
+    description:
+      "Identifica y cancela servicios recurrentes que no uses con frecuencia para liberar flujo de caja.",
     category_hint: ["Suscripciones", "Telefonía", "Internet"],
     challenge_type: "limit",
     difficulty: "easy",
@@ -352,7 +362,8 @@ export const SYSTEM_CHALLENGES: SystemChallengeTemplate[] = [
   {
     id: "sys_mastery",
     title: "💎 Maestría Financiera: Mes Impecable",
-    description: "Cumple con todas tus metas mensuales establecidas sin exceder el límite en ninguna categoría.",
+    description:
+      "Cumple con todas tus metas mensuales establecidas sin exceder el límite en ninguna categoría.",
     category_hint: [],
     challenge_type: "saving",
     difficulty: "hard",

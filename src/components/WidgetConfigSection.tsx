@@ -52,7 +52,8 @@ export function WidgetConfigSection() {
             <AppWindow className="h-4 w-4 text-emerald-500" /> Widgets para Android
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Personaliza qué datos se muestran en tus widgets (2x2, 4x2 y 4x4) y previsualízalos en tiempo real.
+            Personaliza qué datos se muestran en tus widgets (2x2, 4x2 y 4x4) y previsualízalos en
+            tiempo real.
           </p>
         </div>
         <Button
@@ -95,7 +96,9 @@ export function WidgetConfigSection() {
             checked={config.privacyMode}
             onCheckedChange={(v) => {
               update({ privacyMode: v });
-              toast.success(v ? "Modo privacidad activado en widgets" : "Modo privacidad desactivado");
+              toast.success(
+                v ? "Modo privacidad activado en widgets" : "Modo privacidad desactivado",
+              );
             }}
           />
         </div>
@@ -120,10 +123,7 @@ export function WidgetConfigSection() {
               <Label className="text-xs font-semibold">Puntaje de salud</Label>
               <p className="text-[11px] text-muted-foreground">Calificación 0-100</p>
             </div>
-            <Switch
-              checked={config.showScore}
-              onCheckedChange={(v) => update({ showScore: v })}
-            />
+            <Switch checked={config.showScore} onCheckedChange={(v) => update({ showScore: v })} />
           </div>
 
           {/* Ingresos */}
@@ -154,12 +154,11 @@ export function WidgetConfigSection() {
           <div className="flex items-center justify-between gap-2 p-3 rounded-xl border border-border bg-card sm:col-span-2">
             <div>
               <Label className="text-xs font-semibold">Meta de ahorro</Label>
-              <p className="text-[11px] text-muted-foreground">Mostrar tarjeta de progreso en widget 4x4</p>
+              <p className="text-[11px] text-muted-foreground">
+                Mostrar tarjeta de progreso en widget 4x4
+              </p>
             </div>
-            <Switch
-              checked={config.showGoals}
-              onCheckedChange={(v) => update({ showGoals: v })}
-            />
+            <Switch checked={config.showGoals} onCheckedChange={(v) => update({ showGoals: v })} />
           </div>
         </div>
 
@@ -196,8 +195,9 @@ export function WidgetConfigSection() {
           </p>
           <div className="text-[11px] text-muted-foreground space-y-1.5 leading-relaxed">
             <p>
-              <strong className="text-foreground">Opción rápida (automática):</strong> Toca el botón verde{" "}
-              <em>"Añadir widget a mi pantalla de inicio"</em> ubicado en el simulador de arriba. Android te mostrará una ventana emergente para anclarlo en un toque.
+              <strong className="text-foreground">Opción rápida (automática):</strong> Toca el botón
+              verde <em>"Añadir widget a mi pantalla de inicio"</em> ubicado en el simulador de
+              arriba. Android te mostrará una ventana emergente para anclarlo en un toque.
             </p>
             <p>
               <strong className="text-foreground">Opción manual:</strong>
@@ -205,9 +205,15 @@ export function WidgetConfigSection() {
             <ol className="list-decimal pl-4 space-y-0.5">
               <li>Sal de la app y ve a la pantalla principal de tu teléfono Android.</li>
               <li>Mantén presionado tu dedo en cualquier espacio vacío por 1 segundo.</li>
-              <li>Toca la opción <strong>Widgets</strong> en el menú inferior.</li>
-              <li>Busca <strong>PlantWallet</strong> en la lista de aplicaciones.</li>
-              <li>Mantén presionado el widget deseado (2x2, 4x2 o 4x4) y colócalo en tu pantalla.</li>
+              <li>
+                Toca la opción <strong>Widgets</strong> en el menú inferior.
+              </li>
+              <li>
+                Busca <strong>PlantWallet</strong> en la lista de aplicaciones.
+              </li>
+              <li>
+                Mantén presionado el widget deseado (2x2, 4x2 o 4x4) y colócalo en tu pantalla.
+              </li>
             </ol>
           </div>
         </div>

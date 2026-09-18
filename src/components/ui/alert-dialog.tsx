@@ -18,13 +18,7 @@ const AlertDialog = ({
     });
   }, [open, onOpenChange]);
 
-  return (
-    <AlertDialogPrimitive.Root
-      open={open}
-      onOpenChange={onOpenChange}
-      {...props}
-    />
-  );
+  return <AlertDialogPrimitive.Root open={open} onOpenChange={onOpenChange} {...props} />;
 };
 
 const AlertDialogTrigger = AlertDialogPrimitive.Trigger;

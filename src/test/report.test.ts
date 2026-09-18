@@ -21,12 +21,8 @@ describe("report.ts - Suite de Pruebas de Reportes", () => {
       healthScore: 88,
       healthLabel: "Saludable",
       transactionCount: 15,
-      categories: [
-        { emoji: "🍔", name: "Alimentación", amount: 1000000, share: 50 },
-      ],
-      months: [
-        { label: "sep", income: 5000000, expense: 2000000 },
-      ],
+      categories: [{ emoji: "🍔", name: "Alimentación", amount: 1000000, share: 50 }],
+      months: [{ label: "sep", income: 5000000, expense: 2000000 }],
       insights: ["¡Gran tasa de ahorro este mes!"],
       completedChallenges: 3,
       growthPoints: 350,
@@ -52,12 +48,8 @@ describe("report.ts - Suite de Pruebas de Reportes", () => {
       expense: 1500000, // Compras crédito
       balance: 1200000,
       transactionCount: 5,
-      categories: [
-        { emoji: "🛍️", name: "Compras", amount: 1500000, share: 100 },
-      ],
-      months: [
-        { label: "sep", income: 300000, expense: 1500000 },
-      ],
+      categories: [{ emoji: "🛍️", name: "Compras", amount: 1500000, share: 100 }],
+      months: [{ label: "sep", income: 300000, expense: 1500000 }],
       insights: ["Tus consumos a crédito se mantienen separados"],
       completedChallenges: 0,
       growthPoints: 0,

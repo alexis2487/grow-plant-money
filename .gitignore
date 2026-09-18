@@ -42,6 +42,8 @@ dist-ssr
 *.sln
 *.sw?
 
-# Android package files
+# Android package files and keystores
 *.apk
 *.aab
+*.jks
+*.keystore

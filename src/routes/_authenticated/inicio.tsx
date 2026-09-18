@@ -33,13 +33,17 @@ import {
   useTransactions,
 } from "@/lib/data";
 import { buildInsights, categoryBreakdown, computeHealth, sum } from "@/lib/finance";
-import { formatMoney, greeting, monthLabel, monthRange, parseAmount } from "@/lib/format";
+import { monthRange, parseAmount } from "@/lib/format";
+import { useTranslation } from "@/i18n";
 
 export const Route = createFileRoute("/_authenticated/inicio")({
   head: () => ({
     meta: [
       { title: "Inicio — PlantWallet" },
-      { name: "description", content: "Tu salud financiera, balance del mes, retos activos y últimos movimientos." },
+      {
+        name: "description",
+        content: "Tu salud financiera, balance del mes, retos activos y últimos movimientos.",
+      },
       { property: "og:title", content: "Inicio — PlantWallet" },
       { property: "og:description", content: "Tu salud financiera de un vistazo." },
     ],
@@ -48,6 +52,7 @@ export const Route = createFileRoute("/_authenticated/inicio")({
 });
 
 function Inicio() {
+  const { t, greeting, monthLabel, formatMoney } = useTranslation();
   const { data: profile } = useProfile();
   const { data: txs, isLoading } = useTransactions();
   const { data: categories = [] } = useCategories();
@@ -159,7 +164,9 @@ function Inicio() {
           <TabsContent value="debit" className="mt-4 space-y-4">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <div>
-                <span className="text-sm font-medium text-muted-foreground">Balance del mes (Débito)</span>
+                <span className="text-sm font-medium text-muted-foreground">
+                  Balance del mes (Débito)
+                </span>
                 <p
                   className={`mt-1 text-3xl font-bold tabular-nums ${
                     health.current.debit.balance < 0 ? "text-danger" : ""
@@ -200,7 +207,9 @@ function Inicio() {
             <div className="flex items-start gap-2.5 rounded-xl border border-success/20 bg-success/5 p-3 text-xs text-muted-foreground">
               <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden />
               <span>
-                <strong>Salud protegida:</strong> Las compras con tarjeta de crédito no se restan de tu saldo en débito, preservando la exactitud de tu dinero líquido y tu salud financiera.
+                <strong>Salud protegida:</strong> Las compras con tarjeta de crédito no se restan de
+                tu saldo en débito, preservando la exactitud de tu dinero líquido y tu salud
+                financiera.
               </span>
             </div>
           </TabsContent>
@@ -209,7 +218,9 @@ function Inicio() {
           <TabsContent value="credit" className="mt-4 space-y-4">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <div>
-                <span className="text-sm font-medium text-muted-foreground">Balance del mes (Crédito)</span>
+                <span className="text-sm font-medium text-muted-foreground">
+                  Balance del mes (Crédito)
+                </span>
                 <p className="mt-1 text-3xl font-bold tabular-nums">
                   {formatMoney(health.current.credit.expense, currency)}
                 </p>
@@ -509,7 +520,8 @@ function Inicio() {
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              Te avisaremos en tu pantalla de inicio cuando te acerques al 80% o superes el límite establecido.
+              Te avisaremos en tu pantalla de inicio cuando te acerques al 80% o superes el límite
+              establecido.
             </p>
             <Button
               className="h-12 w-full rounded-xl font-semibold"

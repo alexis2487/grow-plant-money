@@ -38,14 +38,14 @@ export function RecurringTransactionsBanner({
   const pendingRecurring = useMemo(() => {
     // Transacciones en el mes actual
     const currentMonthTxs = transactions.filter(
-      (t) => t.transaction_date >= range.start && t.transaction_date <= range.end
+      (t) => t.transaction_date >= range.start && t.transaction_date <= range.end,
     );
 
     // Llaves únicas de transacciones del mes actual
     const registeredKeys = new Set(
-      currentMonthTxs.map((t) =>
-        `${t.type}_${t.category_id || ""}_${(t.description || "").trim().toLowerCase()}`
-      )
+      currentMonthTxs.map(
+        (t) => `${t.type}_${t.category_id || ""}_${(t.description || "").trim().toLowerCase()}`,
+      ),
     );
 
     // Candidatos recurrentes de meses pasados
@@ -60,11 +60,7 @@ export function RecurringTransactionsBanner({
       const dismissKey = `${currentMonthKey}_${key}`;
 
       // Si no ha sido registrada este mes, ni descartada, y es la primera vez que vemos este tipo recurrente:
-      if (
-        !registeredKeys.has(key) &&
-        !dismissedKeys.includes(dismissKey) &&
-        !uniqueMap.has(key)
-      ) {
+      if (!registeredKeys.has(key) && !dismissedKeys.includes(dismissKey) && !uniqueMap.has(key)) {
         uniqueMap.set(key, tx);
       }
     }
@@ -115,9 +111,7 @@ export function RecurringTransactionsBanner({
         recurring_rule: tx.recurring_rule,
       });
 
-      toast.success(
-        `¡"${tx.description || "Movimiento"}" registrado con éxito! 🌱`
-      );
+      toast.success(`¡"${tx.description || "Movimiento"}" registrado con éxito! 🌱`);
     } catch {
       toast.error("Error al registrar movimiento recurrente.");
     } finally {
@@ -172,10 +166,11 @@ export function RecurringTransactionsBanner({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-foreground">
-                Gastos fijos del mes
-              </h3>
-              <Badge variant="secondary" className="px-1.5 py-0 text-[10px] font-semibold bg-primary/10 text-primary border-none">
+              <h3 className="text-sm font-bold text-foreground">Gastos fijos del mes</h3>
+              <Badge
+                variant="secondary"
+                className="px-1.5 py-0 text-[10px] font-semibold bg-primary/10 text-primary border-none"
+              >
                 {pendingRecurring.length} pendientes
               </Badge>
             </div>
@@ -208,7 +203,9 @@ export function RecurringTransactionsBanner({
               className="flex items-center justify-between gap-2 rounded-2xl bg-card border border-border/60 p-2.5 px-3 text-xs shadow-2xs"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <span className="text-base shrink-0">{cat?.emoji || (tx.type === "income" ? "💰" : "💸")}</span>
+                <span className="text-base shrink-0">
+                  {cat?.emoji || (tx.type === "income" ? "💰" : "💸")}
+                </span>
                 <div className="min-w-0">
                   <p className="font-semibold text-foreground truncate">
                     {tx.description || cat?.name || "Gasto recurrente"}

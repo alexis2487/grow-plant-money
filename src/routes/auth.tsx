@@ -23,11 +23,7 @@ import { Label } from "@/components/ui/label";
 import { FinancialPlant } from "@/components/FinancialPlant";
 import { useAuth } from "@/lib/auth";
 import { getLocalProfile } from "@/lib/localDb";
-import {
-  isBiometricAvailable,
-  isBiometricEnabled,
-  promptBiometricAuth,
-} from "@/lib/native";
+import { isBiometricAvailable, isBiometricEnabled, promptBiometricAuth } from "@/lib/native";
 import { useRef } from "react";
 
 export const Route = createFileRoute("/auth")({
@@ -36,7 +32,8 @@ export const Route = createFileRoute("/auth")({
       { title: "PlantWallet — Tu Guía Financiero Local" },
       {
         name: "description",
-        content: "Configura tu acceso local y aprende a cuidar tu planta financiera de forma 100% privada y offline.",
+        content:
+          "Configura tu acceso local y aprende a cuidar tu planta financiera de forma 100% privada y offline.",
       },
     ],
   }),
@@ -70,7 +67,9 @@ function LocalAuthPage() {
       if (success) {
         unlockWithBiometric();
         const userName = user?.name || getLocalProfile().name;
-        toast.success(userName ? `¡Bienvenido a PlantWallet, ${userName}! 🌱` : "¡Bienvenido a PlantWallet! 🌱");
+        toast.success(
+          userName ? `¡Bienvenido a PlantWallet, ${userName}! 🌱` : "¡Bienvenido a PlantWallet! 🌱",
+        );
         navigate({ to: "/inicio", replace: true });
       }
     } finally {
@@ -88,7 +87,11 @@ function LocalAuthPage() {
             if (success) {
               unlockWithBiometric();
               const userName = user?.name || getLocalProfile().name;
-              toast.success(userName ? `¡Bienvenido a PlantWallet, ${userName}! 🌱` : "¡Bienvenido a PlantWallet! 🌱");
+              toast.success(
+                userName
+                  ? `¡Bienvenido a PlantWallet, ${userName}! 🌱`
+                  : "¡Bienvenido a PlantWallet! 🌱",
+              );
               navigate({ to: "/inicio", replace: true });
             }
           });
@@ -171,7 +174,8 @@ function LocalAuthPage() {
       toast.success(`¡Bienvenido a bordo, ${name.trim()}! 🌱`);
       navigate({ to: "/inicio", replace: true });
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Ocurrió un error al configurar tu cuenta local.";
+      const msg =
+        err instanceof Error ? err.message : "Ocurrió un error al configurar tu cuenta local.";
       toast.error(msg);
     } finally {
       setBusy(false);
@@ -188,7 +192,9 @@ function LocalAuthPage() {
       const ok = await unlock(pinCandidate);
       if (ok) {
         const userName = user?.name || getLocalProfile().name;
-        toast.success(userName ? `¡Bienvenido a PlantWallet, ${userName}! 🌱` : "¡Bienvenido a PlantWallet! 🌱");
+        toast.success(
+          userName ? `¡Bienvenido a PlantWallet, ${userName}! 🌱` : "¡Bienvenido a PlantWallet! 🌱",
+        );
         navigate({ to: "/inicio", replace: true });
         return true;
       } else if (showToastOnFail) {
@@ -241,7 +247,9 @@ function LocalAuthPage() {
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="text-center">
           <FinancialPlant score={90} size={120} />
-          <p className="mt-4 text-sm text-muted-foreground animate-pulse">Iniciando tu jardín financiero...</p>
+          <p className="mt-4 text-sm text-muted-foreground animate-pulse">
+            Iniciando tu jardín financiero...
+          </p>
         </div>
       </div>
     );
@@ -285,7 +293,8 @@ function LocalAuthPage() {
               <div className="relative rounded-3xl border border-primary/25 bg-card p-5 shadow-sm text-left">
                 <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 h-5 w-5 rotate-45 border-l border-t border-primary/25 bg-card" />
                 <p className="text-sm leading-relaxed text-foreground font-medium">
-                  ¡Hola! Soy tu planta financiera 🌱. A partir de hoy creceré y floreceré con cada hábito de ahorro que registres.
+                  ¡Hola! Soy tu planta financiera 🌱. A partir de hoy creceré y floreceré con cada
+                  hábito de ahorro que registres.
                 </p>
                 <p className="mt-2 text-xs text-muted-foreground">
                   Para empezar a conocernos, <strong>¿cómo te gustaría que te llame?</strong>
@@ -333,7 +342,8 @@ function LocalAuthPage() {
                   Mucho gusto, <strong>{name}</strong>. Cuidemos tu privacidad 🔒.
                 </p>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Crea una <strong>clave o PIN de acceso</strong> para que nadie más pueda abrir tu aplicación en este dispositivo.
+                  Crea una <strong>clave o PIN de acceso</strong> para que nadie más pueda abrir tu
+                  aplicación en este dispositivo.
                 </p>
               </div>
 
@@ -348,7 +358,11 @@ function LocalAuthPage() {
                       onClick={() => setShowPin(!showPin)}
                       className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
                     >
-                      {showPin ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      {showPin ? (
+                        <EyeOff className="h-3.5 w-3.5" />
+                      ) : (
+                        <Eye className="h-3.5 w-3.5" />
+                      )}
                       <span>{showPin ? "Ocultar" : "Mostrar"}</span>
                     </button>
                   </div>
@@ -420,7 +434,8 @@ function LocalAuthPage() {
                   Configura una <strong>pregunta de seguridad</strong> para tu tranquilidad.
                 </p>
                 <p className="mt-1.5 text-xs text-muted-foreground">
-                  Si alguna vez olvidas tu clave, responderás esta pregunta para restablecerla al instante.
+                  Si alguna vez olvidas tu clave, responderás esta pregunta para restablecerla al
+                  instante.
                 </p>
               </div>
 
@@ -495,7 +510,8 @@ function LocalAuthPage() {
                   <div>
                     <h3 className="text-sm font-semibold">1. Tu Planta Financiera</h3>
                     <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
-                      Tu planta crece y florece según tu salud financiera real. Si ahorras y mantienes tus gastos en verde, prosperará.
+                      Tu planta crece y florece según tu salud financiera real. Si ahorras y
+                      mantienes tus gastos en verde, prosperará.
                     </p>
                   </div>
                 </div>
@@ -507,7 +523,8 @@ function LocalAuthPage() {
                   <div>
                     <h3 className="text-sm font-semibold">2. Débito y Crédito Independientes</h3>
                     <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
-                      Tus compras a crédito se registran por separado y no restan de tu saldo de débito, protegiendo tu liquidez.
+                      Tus compras a crédito se registran por separado y no restan de tu saldo de
+                      débito, protegiendo tu liquidez.
                     </p>
                   </div>
                 </div>
@@ -519,7 +536,8 @@ function LocalAuthPage() {
                   <div>
                     <h3 className="text-sm font-semibold">3. Retos y Colección</h3>
                     <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
-                      Cumple retos para ganar Growth Points y personalizar tu planta con skins exclusivas.
+                      Cumple retos para ganar Growth Points y personalizar tu planta con skins
+                      exclusivas.
                     </p>
                   </div>
                 </div>
@@ -539,9 +557,7 @@ function LocalAuthPage() {
         </div>
 
         {/* Pie de página discreto */}
-        <p className="text-center text-[11px] text-muted-foreground pb-2">
-          PlantWallet
-        </p>
+        <p className="text-center text-[11px] text-muted-foreground pb-2">PlantWallet</p>
       </main>
     );
   }
@@ -579,7 +595,11 @@ function LocalAuthPage() {
                     onClick={() => setShowInputPin(!showInputPin)}
                     className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
                   >
-                    {showInputPin ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                    {showInputPin ? (
+                      <EyeOff className="h-3.5 w-3.5" />
+                    ) : (
+                      <Eye className="h-3.5 w-3.5" />
+                    )}
                     <span>{showInputPin ? "Ocultar" : "Mostrar"}</span>
                   </button>
                 </div>
@@ -604,7 +624,11 @@ function LocalAuthPage() {
                 />
               </div>
 
-              <Button type="submit" disabled={busy} className="h-13 w-full rounded-2xl text-base font-semibold">
+              <Button
+                type="submit"
+                disabled={busy}
+                className="h-13 w-full rounded-2xl text-base font-semibold"
+              >
                 Desbloquear con PIN <Lock className="ml-2 h-4 w-4" />
               </Button>
 
@@ -709,7 +733,11 @@ function LocalAuthPage() {
                 >
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={busy} className="h-12 flex-1 rounded-xl font-semibold">
+                <Button
+                  type="submit"
+                  disabled={busy}
+                  className="h-12 flex-1 rounded-xl font-semibold"
+                >
                   Restablecer y entrar
                 </Button>
               </div>
@@ -718,9 +746,7 @@ function LocalAuthPage() {
         )}
       </div>
 
-      <p className="text-center text-[11px] text-muted-foreground">
-        PlantWallet
-      </p>
+      <p className="text-center text-[11px] text-muted-foreground">PlantWallet</p>
     </main>
   );
 }

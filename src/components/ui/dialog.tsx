@@ -20,13 +20,7 @@ const Dialog = ({
     });
   }, [open, onOpenChange]);
 
-  return (
-    <DialogPrimitive.Root
-      open={open}
-      onOpenChange={onOpenChange}
-      {...props}
-    />
-  );
+  return <DialogPrimitive.Root open={open} onOpenChange={onOpenChange} {...props} />;
 };
 
 const DialogTrigger = DialogPrimitive.Trigger;

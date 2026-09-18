@@ -1,12 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, beforeEach } from "vitest";
 
 // Mock de localStorage y window para pruebas en entorno Node
 const memoryStorage = new Map<string, string>();
 const localStorageMock = {
   getItem: (k: string) => memoryStorage.get(k) ?? null,
-  setItem: (k: string, v: string) => { memoryStorage.set(k, String(v)); },
-  removeItem: (k: string) => { memoryStorage.delete(k); },
-  clear: () => { memoryStorage.clear(); },
+  setItem: (k: string, v: string) => {
+    memoryStorage.set(k, String(v));
+  },
+  removeItem: (k: string) => {
+    memoryStorage.delete(k);
+  },
+  clear: () => {
+    memoryStorage.clear();
+  },
 };
 
 const listeners = new Map<string, Array<(e: any) => void>>();

@@ -135,6 +135,7 @@ const DEFAULT_PROFILE: Profile = {
   avatar_url: null,
   base_currency: "COP",
   theme: "system",
+  language: "es",
   date_format: "DD/MM/YYYY",
   week_start: 1,
   growth_points: 0,
@@ -293,7 +294,11 @@ export function getLocalBudgets(): Budget[] {
   return getJson<Budget[]>(STORAGE_KEYS.BUDGETS, []);
 }
 
-export function saveLocalBudget(input: { category_id: string; amount: number; currency: string }): Budget {
+export function saveLocalBudget(input: {
+  category_id: string;
+  amount: number;
+  currency: string;
+}): Budget {
   const current = getLocalBudgets();
   const cur = monthRange(0);
   const existingIdx = current.findIndex((b) => b.category_id === input.category_id);
@@ -386,13 +391,17 @@ export function recalcLocalChallenges(): void {
   for (const c of challenges) {
     if (c.status !== "active") continue;
 
-    const inRange = txs.filter((t) => t.transaction_date >= c.start_date && t.transaction_date <= c.end_date);
+    const inRange = txs.filter(
+      (t) => t.transaction_date >= c.start_date && t.transaction_date <= c.end_date,
+    );
 
     if (c.challenge_type === "saving") {
       // Reto de ahorro: balance en débito
       const debitIn = inRange.filter((t) => t.type === "income" && t.payment_method !== "credit");
       const debitOut = inRange.filter((t) => t.type === "expense" && t.payment_method !== "credit");
-      const saved = debitIn.reduce((a, b) => a + Number(b.amount), 0) - debitOut.reduce((a, b) => a + Number(b.amount), 0);
+      const saved =
+        debitIn.reduce((a, b) => a + Number(b.amount), 0) -
+        debitOut.reduce((a, b) => a + Number(b.amount), 0);
       c.progress_amount = Math.max(0, saved);
 
       if (saved >= c.target_amount) {
