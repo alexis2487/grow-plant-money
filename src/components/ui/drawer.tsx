@@ -2,13 +2,31 @@ import * as React from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "@/lib/utils";
+import { registerBackHandler } from "@/lib/native";
 
 const Drawer = ({
   shouldScaleBackground = true,
+  open,
+  onOpenChange,
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
-  <DrawerPrimitive.Root shouldScaleBackground={shouldScaleBackground} {...props} />
-);
+}: React.ComponentProps<typeof DrawerPrimitive.Root>) => {
+  React.useEffect(() => {
+    if (!open || !onOpenChange) return;
+    return registerBackHandler(() => {
+      onOpenChange(false);
+      return true;
+    });
+  }, [open, onOpenChange]);
+
+  return (
+    <DrawerPrimitive.Root
+      shouldScaleBackground={shouldScaleBackground}
+      open={open}
+      onOpenChange={onOpenChange}
+      {...props}
+    />
+  );
+};
 Drawer.displayName = "Drawer";
 
 const DrawerTrigger = DrawerPrimitive.Trigger;

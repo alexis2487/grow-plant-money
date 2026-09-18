@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { AuthProvider } from "../lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { setupBackButtonListener } from "@/lib/native";
 
 function NotFoundComponent() {
   return (
@@ -183,7 +184,12 @@ function RootComponent() {
       subtree: true,
     });
 
-    return () => observer.disconnect();
+    const cleanupBack = setupBackButtonListener();
+
+    return () => {
+      observer.disconnect();
+      cleanupBack();
+    };
   }, []);
 
   return (

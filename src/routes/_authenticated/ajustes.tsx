@@ -495,8 +495,8 @@ function DataSection() {
       a.download = fileName;
       a.click();
       URL.revokeObjectURL(url);
+      toast.success("Copia de seguridad descargada en tu dispositivo 📦");
     }
-    toast.success("¡Copia de seguridad generada con éxito! 📦");
   }
 
   function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -545,8 +545,8 @@ function DataSection() {
       a.download = fileName;
       a.click();
       URL.revokeObjectURL(url);
+      toast.success("Reporte CSV descargado en tu dispositivo 📄");
     }
-    toast.success("¡Reporte CSV generado con éxito! 📄");
   }
 
   return (

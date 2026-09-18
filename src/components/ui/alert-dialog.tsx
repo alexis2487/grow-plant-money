@@ -3,8 +3,29 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import { registerBackHandler } from "@/lib/native";
 
-const AlertDialog = AlertDialogPrimitive.Root;
+const AlertDialog = ({
+  open,
+  onOpenChange,
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Root>) => {
+  React.useEffect(() => {
+    if (!open || !onOpenChange) return;
+    return registerBackHandler(() => {
+      onOpenChange(false);
+      return true;
+    });
+  }, [open, onOpenChange]);
+
+  return (
+    <AlertDialogPrimitive.Root
+      open={open}
+      onOpenChange={onOpenChange}
+      {...props}
+    />
+  );
+};
 
 const AlertDialogTrigger = AlertDialogPrimitive.Trigger;
 

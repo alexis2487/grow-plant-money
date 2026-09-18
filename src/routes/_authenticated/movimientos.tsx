@@ -105,8 +105,8 @@ function Movimientos() {
       a.download = fileName;
       a.click();
       URL.revokeObjectURL(url);
+      toast.success("Reporte CSV descargado en tu dispositivo 📄");
     }
-    toast.success("¡Reporte CSV generado con éxito! 📄");
   }
 
   return (

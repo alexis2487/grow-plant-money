@@ -6,8 +6,29 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { registerBackHandler } from "@/lib/native";
 
-const Sheet = SheetPrimitive.Root;
+const Sheet = ({
+  open,
+  onOpenChange,
+  ...props
+}: React.ComponentProps<typeof SheetPrimitive.Root>) => {
+  React.useEffect(() => {
+    if (!open || !onOpenChange) return;
+    return registerBackHandler(() => {
+      onOpenChange(false);
+      return true;
+    });
+  }, [open, onOpenChange]);
+
+  return (
+    <SheetPrimitive.Root
+      open={open}
+      onOpenChange={onOpenChange}
+      {...props}
+    />
+  );
+};
 
 const SheetTrigger = SheetPrimitive.Trigger;
 
