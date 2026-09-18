@@ -188,6 +188,29 @@ export function WidgetConfigSection() {
             </Select>
           </div>
         )}
+
+        {/* Guía paso a paso para Android */}
+        <div className="rounded-2xl bg-muted/40 border border-border p-3.5 space-y-2 mt-3">
+          <p className="text-xs font-bold text-foreground flex items-center gap-1.5">
+            💡 ¿Cómo poner el widget en la pantalla de inicio de tu teléfono?
+          </p>
+          <div className="text-[11px] text-muted-foreground space-y-1.5 leading-relaxed">
+            <p>
+              <strong className="text-foreground">Opción rápida (automática):</strong> Toca el botón verde{" "}
+              <em>"Añadir widget a mi pantalla de inicio"</em> ubicado en el simulador de arriba. Android te mostrará una ventana emergente para anclarlo en un toque.
+            </p>
+            <p>
+              <strong className="text-foreground">Opción manual:</strong>
+            </p>
+            <ol className="list-decimal pl-4 space-y-0.5">
+              <li>Sal de la app y ve a la pantalla principal de tu teléfono Android.</li>
+              <li>Mantén presionado tu dedo en cualquier espacio vacío por 1 segundo.</li>
+              <li>Toca la opción <strong>Widgets</strong> en el menú inferior.</li>
+              <li>Busca <strong>PlantWallet</strong> en la lista de aplicaciones.</li>
+              <li>Mantén presionado el widget deseado (2x2, 4x2 o 4x4) y colócalo en tu pantalla.</li>
+            </ol>
+          </div>
+        </div>
       </div>
     </section>
   );

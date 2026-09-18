@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
-import { Plus, Minus, Target, Sparkles, Eye, EyeOff } from "lucide-react";
+import { Plus, Minus, Target, Sparkles, Eye, EyeOff, Pin } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import type { WidgetConfig, WidgetDataPayload } from "@/lib/widget";
-import { computeWidgetData, loadWidgetConfig } from "@/lib/widget";
+import { computeWidgetData, loadWidgetConfig, pinNativeWidget } from "@/lib/widget";
 import { useBudgets, useChallenges, useProfile, useTransactions } from "@/lib/data";
 import { useTransactionSheet } from "@/routes/_authenticated/route";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,26 @@ export function WidgetPreview({ config: controlledConfig, onConfigChange }: Prop
   const [localConfig, setLocalConfig] = useState<WidgetConfig>(loadWidgetConfig());
   const activeConfig = controlledConfig ?? localConfig;
   const [selectedSize, setSelectedSize] = useState<"2x2" | "4x2" | "4x4">("4x2");
+  const [pinning, setPinning] = useState(false);
+
+  const handlePinWidget = async () => {
+    setPinning(true);
+    const targetType =
+      selectedSize === "2x2" ? "compact" : selectedSize === "4x2" ? "summary" : "goals";
+    const res = await pinNativeWidget(targetType);
+    setPinning(false);
+    if (res.supported && res.requested) {
+      toast.success(
+        "¡Solicitud enviada! Confirma en el cuadro de diálogo de Android para añadir el widget.",
+      );
+    } else {
+      toast.info(
+        res.message ||
+          "Mantén presionada un área vacía de tu pantalla principal > Widgets > PlantWallet.",
+        { duration: 6000 },
+      );
+    }
+  };
 
   const [widgetData, setWidgetData] = useState<WidgetDataPayload>(() =>
     computeWidgetData(
@@ -380,6 +401,19 @@ export function WidgetPreview({ config: controlledConfig, onConfigChange }: Prop
             </div>
           )}
         </div>
+      </div>
+
+      {/* Botón para anclar el widget nativo directamente */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5">
+        <Button
+          type="button"
+          onClick={handlePinWidget}
+          disabled={pinning}
+          className="w-full h-11 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold gap-2 shadow cursor-pointer active:scale-95 transition-all"
+        >
+          <Pin className="h-4 w-4" />
+          Añadir widget ({selectedSize}) a mi pantalla de inicio
+        </Button>
       </div>
     </div>
   );

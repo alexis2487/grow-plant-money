@@ -159,11 +159,25 @@ export function computeWidgetData(
 
 export interface PlantWalletWidgetPluginInterface {
   updateWidgetData(data: WidgetDataPayload): Promise<{ success: boolean }>;
+  pinWidget(options: { widgetType: "compact" | "summary" | "goals" }): Promise<{ supported: boolean; requested?: boolean; message?: string }>;
 }
 
 const PlantWalletWidget = registerPlugin<PlantWalletWidgetPluginInterface>(
   "PlantWalletWidget",
 );
+
+export async function pinNativeWidget(
+  widgetType: "compact" | "summary" | "goals",
+): Promise<{ supported: boolean; requested?: boolean; message?: string }> {
+  try {
+    return await PlantWalletWidget.pinWidget({ widgetType });
+  } catch {
+    return {
+      supported: false,
+      message: "Para añadir el widget, mantén presionada la pantalla de inicio de tu teléfono, selecciona 'Widgets' y busca 'PlantWallet'.",
+    };
+  }
+}
 
 export async function syncNativeWidgets(payload: WidgetDataPayload): Promise<void> {
   // Notificar al simulador / componentes reactivos dentro de la app web/móvil

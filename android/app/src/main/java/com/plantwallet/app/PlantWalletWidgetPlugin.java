@@ -1,7 +1,10 @@
 package com.plantwallet.app;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
@@ -76,6 +79,43 @@ public class PlantWalletWidgetPlugin extends Plugin {
             call.resolve(ret);
         } catch (Exception e) {
             call.reject("Failed to update widget data: " + e.getMessage(), e);
+        }
+    }
+
+    @PluginMethod
+    public void pinWidget(PluginCall call) {
+        try {
+            Context context = getContext();
+            String widgetType = call.getString("widgetType", "compact");
+            Class<?> targetProvider;
+
+            if ("summary".equalsIgnoreCase(widgetType)) {
+                targetProvider = SummaryWidgetProvider.class;
+            } else if ("goals".equalsIgnoreCase(widgetType)) {
+                targetProvider = GoalsWidgetProvider.class;
+            } else {
+                targetProvider = CompactWidgetProvider.class;
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+                if (appWidgetManager.isRequestPinAppWidgetSupported()) {
+                    ComponentName provider = new ComponentName(context, targetProvider);
+                    boolean requested = appWidgetManager.requestPinAppWidget(provider, null, null);
+                    JSObject ret = new JSObject();
+                    ret.put("supported", true);
+                    ret.put("requested", requested);
+                    call.resolve(ret);
+                    return;
+                }
+            }
+
+            JSObject ret = new JSObject();
+            ret.put("supported", false);
+            ret.put("message", "El launcher no soporta anclado directo. Agrégalo manteniendo presionada la pantalla de inicio.");
+            call.resolve(ret);
+        } catch (Exception e) {
+            call.reject("Error requesting pin widget: " + e.getMessage(), e);
         }
     }
 }
