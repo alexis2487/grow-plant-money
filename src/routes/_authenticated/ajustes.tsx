@@ -327,7 +327,7 @@ function SecuritySection() {
       <Accordion type="single" collapsible>
         <AccordionItem value="sec" className="border-0">
           <AccordionTrigger className="py-0 text-base font-semibold hover:no-underline">
-            Seguridad & Clave Local
+            Seguridad y Clave
           </AccordionTrigger>
           <AccordionContent className="space-y-3.5 pt-4">
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground">

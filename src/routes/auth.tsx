@@ -194,9 +194,7 @@ function LocalAuthPage() {
         <div className="w-full pt-2">
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-2 font-medium">
             <span>Paso {onboardingStep} de 4</span>
-            <span className="flex items-center gap-1 text-primary">
-              <ShieldCheck className="h-3.5 w-3.5" /> 100% Local y Seguro
-            </span>
+            <span className="text-xs text-muted-foreground">PlantWallet</span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
             <div
@@ -350,10 +348,10 @@ function LocalAuthPage() {
               {/* Burbuja de diálogo */}
               <div className="relative rounded-3xl border border-primary/25 bg-card p-5 shadow-sm text-left">
                 <p className="text-sm leading-relaxed text-foreground font-medium">
-                  ¡Casi listos! Como tus datos son <strong>100% locales</strong> y no usamos servidores externos, no hay correos de recuperación.
+                  Configura una <strong>pregunta de seguridad</strong> para tu tranquilidad.
                 </p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Configura una <strong>pregunta de seguridad secreta</strong>. Si alguna vez olvidas tu clave, responderás esta pregunta para restablecerla.
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  Si alguna vez olvidas tu clave, responderás esta pregunta para restablecerla al instante.
                 </p>
               </div>
 
@@ -450,21 +448,9 @@ function LocalAuthPage() {
                     <Trophy className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold">3. Retos y Colección de Skins</h3>
+                    <h3 className="text-sm font-semibold">3. Retos y Colección</h3>
                     <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
-                      Cumple retos oficiales del sistema para ganar Growth Points y desbloquear más de 25 plantas, macetas, fondos y efectos.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3.5 shadow-sm">
-                  <div className="rounded-xl bg-primary/10 p-2.5 text-primary shrink-0 mt-0.5">
-                    <Smartphone className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold">4. 100% Offline y Privado</h3>
-                    <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
-                      Tus datos no van a la nube ni requieren internet. Todo se almacena localmente y de forma segura en tu teléfono.
+                      Cumple retos para ganar Growth Points y personalizar tu planta con skins exclusivas.
                     </p>
                   </div>
                 </div>
@@ -485,7 +471,7 @@ function LocalAuthPage() {
 
         {/* Pie de página discreto */}
         <p className="text-center text-[11px] text-muted-foreground pb-2">
-          PlantWallet · Cultiva mejor tus finanzas locales
+          PlantWallet
         </p>
       </main>
     );
@@ -635,7 +621,7 @@ function LocalAuthPage() {
       </div>
 
       <p className="text-center text-[11px] text-muted-foreground">
-        🔒 PlantWallet · Finanzas 100% privadas y locales
+        PlantWallet
       </p>
     </main>
   );

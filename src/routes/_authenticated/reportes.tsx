@@ -163,23 +163,6 @@ function Reportes() {
         </TabsList>
       </Tabs>
 
-      {/* MENSAJE EXPLICATIVO SEGÚN EL TIPO DE REPORTE */}
-      {isCredit ? (
-        <div className="flex items-center gap-2.5 rounded-2xl border border-warning/25 bg-warning/5 p-3.5 text-xs text-muted-foreground">
-          <CreditCard className="h-4 w-4 shrink-0 text-warning" />
-          <span>
-            <strong>Reporte de Tarjeta de Crédito:</strong> Analiza compras a crédito, pagos o abonos a la tarjeta y saldo adeudado del período. No afecta tu liquidez en débito.
-          </span>
-        </div>
-      ) : (
-        <div className="flex items-center gap-2.5 rounded-2xl border border-success/25 bg-success/5 p-3.5 text-xs text-muted-foreground">
-          <Wallet className="h-4 w-4 shrink-0 text-success" />
-          <span>
-            <strong>Reporte de Débito (Dinero Real):</strong> Refleja tus ingresos líquidos, gastos reales y capacidad de ahorro efectiva del mes.
-          </span>
-        </div>
-      )}
-
       {/* NAVEGACIÓN ENTRE MESES */}
       <div className="flex gap-2">
         <Button variant="secondary" className="h-11 flex-1 rounded-xl" onClick={() => setOffset((o) => o - 1)}>

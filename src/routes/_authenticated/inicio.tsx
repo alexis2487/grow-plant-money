@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HealthCard } from "@/components/HealthCard";
 import { ChallengeCard } from "@/components/ChallengeCard";
 import { EmptyState } from "@/components/EmptyState";
+import { DynamicFinancialTips } from "@/components/DynamicFinancialTips";
 import {
   useBudgets,
   useCategories,
@@ -119,9 +120,6 @@ function Inicio() {
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Balance del mes
-              </p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Débito y crédito separados para una salud financiera real
               </p>
             </div>
             <TabsList className="grid h-12 w-full grid-cols-2 rounded-2xl bg-secondary p-1 sm:w-64">
@@ -237,13 +235,6 @@ function Inicio() {
                   } a crédito este mes por un total de ${formatMoney(health.current.credit.expense, currency)}.`
                 : "No tienes compras a crédito registradas este mes."}
             </p>
-
-            <div className="flex items-start gap-2.5 rounded-xl border border-warning/20 bg-warning/5 p-3 text-xs text-muted-foreground">
-              <CreditCard className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
-              <span>
-                <strong>Gestión independiente:</strong> El crédito se registra por separado y no reduce tu dinero real en débito, evitando falsas alertas en tu salud financiera.
-              </span>
-            </div>
           </TabsContent>
         </Tabs>
       </section>
@@ -428,22 +419,7 @@ function Inicio() {
         )}
       </section>
 
-      <section className="surface p-5">
-        <h2 className="text-base font-semibold">Consejos para mejorar tus finanzas</h2>
-        <ul className="mt-3 space-y-2">
-          {insights.map((i, idx) => (
-            <li key={idx} className="flex gap-2 text-sm">
-              <span aria-hidden>
-                {i.tone === "good" ? "🟢" : i.tone === "warn" ? "🟡" : i.tone === "bad" ? "🔴" : "🌱"}
-              </span>
-              <span className="text-muted-foreground">{i.text}</span>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-3 text-xs text-muted-foreground">
-          Información orientativa basada en tus datos; no es asesoría financiera profesional.
-        </p>
-      </section>
+      <DynamicFinancialTips />
 
       <section className="space-y-3">
         <div className="flex items-center justify-between">
