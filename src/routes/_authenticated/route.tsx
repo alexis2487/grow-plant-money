@@ -6,6 +6,7 @@ import { useProfile } from "@/lib/data";
 import { useAuth } from "@/lib/auth";
 import { getLocalAuthConfig } from "@/lib/localDb";
 import { registerBackHandler } from "@/lib/native";
+import { refreshAndSyncWidgets } from "@/lib/widget";
 import type { Transaction, TxType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -74,6 +75,72 @@ function AppShell() {
         .catch(() => {});
     }
   }, [profile?.theme]);
+
+  // Sincronizar widgets nativos y simulador al iniciar
+  useEffect(() => {
+    refreshAndSyncWidgets().catch(() => {});
+  }, []);
+
+  // Manejo de deep-links desde widgets (URLs como /inicio?quick=expense o /inicio?quick=income)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const quick = params.get("quick");
+    if (quick === "expense" || quick === "income") {
+      setSheetType(quick);
+      setEditing(null);
+      setSheetOpen(true);
+      const url = new URL(window.location.href);
+      url.searchParams.delete("quick");
+      window.history.replaceState({}, "", url.pathname + (url.search ? url.search : ""));
+    }
+  }, []);
+
+  // Escuchar eventos de deep-linking nativos de Capacitor (appUrlOpen)
+  useEffect(() => {
+    let removeListener: (() => void) | undefined;
+    if (typeof window === "undefined") return;
+
+    import("@capacitor/app")
+      .then(({ App }) => {
+        const handle = App.addListener("appUrlOpen", (event) => {
+          try {
+            const parsed = new URL(event.url);
+            const path = parsed.pathname;
+            const quick = parsed.searchParams.get("quick");
+
+            if (path.includes("/movimientos")) {
+              navigate({ to: "/movimientos" });
+            } else if (path.includes("/retos")) {
+              navigate({ to: "/retos" });
+            } else if (path.includes("/ajustes")) {
+              navigate({ to: "/ajustes" });
+            } else if (path.includes("/inicio")) {
+              navigate({ to: "/inicio" });
+            }
+
+            if (quick === "expense" || quick === "income") {
+              setTimeout(() => {
+                setSheetType(quick);
+                setEditing(null);
+                setSheetOpen(true);
+              }, 120);
+            }
+          } catch (err) {
+            console.warn("Error procesando appUrlOpen:", err);
+          }
+        });
+
+        handle.then((sub) => {
+          removeListener = () => sub.remove();
+        });
+      })
+      .catch(() => {});
+
+    return () => {
+      removeListener?.();
+    };
+  }, [navigate]);
 
   const api: SheetApi = {
     open: (type, tx = null) => {

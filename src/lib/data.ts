@@ -22,6 +22,7 @@ import {
   unlockLocalItem,
   updateLocalProfile,
 } from "./localDb";
+import { refreshAndSyncWidgets } from "./widget";
 
 export const DEFAULT_CATEGORIES: Array<Omit<Category, "id" | "user_id">> = [
   { name: "Vivienda", emoji: "🏠", type: "expense", is_essential: true, is_active: true, color: null, description: null },
@@ -116,6 +117,7 @@ export function useSaveTransaction() {
       qc.invalidateQueries({ queryKey: ["challenges"] });
       qc.invalidateQueries({ queryKey: ["profile"] });
       qc.invalidateQueries({ queryKey: ["user_plant_items"] });
+      refreshAndSyncWidgets().catch(() => {});
     },
   });
 }
@@ -128,6 +130,7 @@ export function useDeleteTransaction() {
       qc.invalidateQueries({ queryKey: ["transactions"] });
       qc.invalidateQueries({ queryKey: ["challenges"] });
       qc.invalidateQueries({ queryKey: ["profile"] });
+      refreshAndSyncWidgets().catch(() => {});
     },
   });
 }
@@ -143,7 +146,10 @@ export function useSaveBudget() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (input: { category_id: string; amount: number; currency: string }) => saveLocalBudget(input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["budgets"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["budgets"] });
+      refreshAndSyncWidgets().catch(() => {});
+    },
   });
 }
 
@@ -151,7 +157,10 @@ export function useDeleteBudget() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => deleteLocalBudget(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["budgets"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["budgets"] });
+      refreshAndSyncWidgets().catch(() => {});
+    },
   });
 }
 
@@ -166,7 +175,10 @@ export function useStartChallenge() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (input: Partial<UserChallenge>) => startLocalChallenge(input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["challenges"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["challenges"] });
+      refreshAndSyncWidgets().catch(() => {});
+    },
   });
 }
 
@@ -174,7 +186,10 @@ export function useAbandonChallenge() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => abandonLocalChallenge(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["challenges"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["challenges"] });
+      refreshAndSyncWidgets().catch(() => {});
+    },
   });
 }
 

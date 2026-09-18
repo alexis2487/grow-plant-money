@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { WidgetConfigSection } from "@/components/WidgetConfigSection";
 import {
   useCategories,
   useProfile,
@@ -153,6 +154,7 @@ function Ajustes() {
         </div>
       </section>
 
+      <WidgetConfigSection />
 
       <CategoriesSection emojis={EMOJIS} />
       <NotificationsSection />

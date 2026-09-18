@@ -4,4 +4,7 @@
     <string name="title_activity_main">PlantWallet</string>
     <string name="package_name">com.plantwallet.app</string>
     <string name="custom_url_scheme">com.plantwallet.app</string>
+    <string name="widget_compact_name">PlantWallet Compacto (2x2)</string>
+    <string name="widget_summary_name">PlantWallet Resumen (4x2)</string>
+    <string name="widget_goals_name">PlantWallet Metas (4x4)</string>
 </resources>

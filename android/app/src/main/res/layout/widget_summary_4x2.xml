@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_summary_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_card_background"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:gravity="center_vertical">
+
+    <!-- Fila superior: Cabecera y Saldo -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- Lado izquierdo: Planta + Salud -->
+        <LinearLayout
+            android:id="@+id/ll_dashboard_trigger"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_plant_emoji"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🌿"
+                android:textSize="28sp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PlantWallet"
+                    android:textColor="#f1f5f9"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_health_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Salud financiera"
+                    android:textColor="#94a3b8"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/tv_health"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="82/100"
+                    android:textColor="#22c55e"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Lado derecho: Saldo disponible -->
+        <LinearLayout
+            android:id="@+id/ll_balance_trigger"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_balance_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Disponible:"
+                android:textColor="#94a3b8"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/tv_balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="$1.240.000"
+                android:textColor="#ffffff"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Fila intermedia: Ingresos y Gastos del período -->
+    <LinearLayout
+        android:id="@+id/ll_period_totals"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tv_income"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Ingresos: +$3.500.000"
+            android:textColor="#4ade80"
+            android:textSize="11sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tv_expense"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Gastos: -$2.260.000"
+            android:textColor="#f87171"
+            android:textSize="11sp"
+            android:gravity="end"
+            android:maxLines="1"
+            android:ellipsize="end" />
+    </LinearLayout>
+
+    <!-- Fila inferior: Botones de registro rápido -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/btn_quick_expense"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/widget_button_pill"
+            android:gravity="center"
+            android:text="- Gasto"
+            android:textColor="#f87171"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/btn_quick_income"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:background="@drawable/widget_button_pill"
+            android:gravity="center"
+            android:text="+ Ingreso"
+            android:textColor="#22c55e"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</LinearLayout>

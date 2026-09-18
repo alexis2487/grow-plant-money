@@ -22,7 +22,53 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="plantwallet.app" />
+            </intent-filter>
+
         </activity>
+
+        <!-- Compact Widget 2x2 -->
+        <receiver
+            android:name=".CompactWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_compact_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_compact_2x2_info" />
+        </receiver>
+
+        <!-- Summary Widget 4x2 -->
+        <receiver
+            android:name=".SummaryWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_summary_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_summary_4x2_info" />
+        </receiver>
+
+        <!-- Goals Widget 4x4 -->
+        <receiver
+            android:name=".GoalsWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_goals_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_goals_4x4_info" />
+        </receiver>
 
         <provider
             android:name="androidx.core.content.FileProvider"

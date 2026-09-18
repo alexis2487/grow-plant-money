@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_goals_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_card_background"
+    android:orientation="vertical"
+    android:padding="14dp">
+
+    <!-- Fila 1: Cabecera y Saldo -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:id="@+id/ll_dashboard_trigger"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_plant_emoji"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🌳"
+                android:textSize="32sp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PlantWallet"
+                    android:textColor="#f1f5f9"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_health_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Salud financiera"
+                    android:textColor="#94a3b8"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/tv_health"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="84/100"
+                    android:textColor="#22c55e"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Saldo disponible -->
+        <LinearLayout
+            android:id="@+id/ll_balance_trigger"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_balance_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Disponible:"
+                android:textColor="#94a3b8"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/tv_balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="$1.240.000"
+                android:textColor="#ffffff"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Fila 2: Ahorro del mes -->
+    <LinearLayout
+        android:id="@+id/ll_savings_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ahorro del mes: "
+            android:textColor="#94a3b8"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tv_savings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="$850.000"
+            android:textColor="#4ade80"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Fila 3: Tarjeta de Meta Actual -->
+    <LinearLayout
+        android:id="@+id/ll_goal_card"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/widget_button_pill"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tv_goal_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Meta actual:"
+            android:textColor="#94a3b8"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/tv_goal_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="🏖️ Vacaciones"
+            android:textColor="#f8fafc"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_goal_amount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="$1.200.000 / $3.000.000"
+                android:textColor="#cbd5e1"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/tv_goal_percent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="40%"
+                android:textColor="#22c55e"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Barra de Progreso -->
+        <ProgressBar
+            android:id="@+id/pb_goal_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:layout_marginTop="6dp"
+            android:max="100"
+            android:progress="40"
+            android:progressDrawable="@drawable/widget_progress_bar" />
+
+        <!-- Subtítulo cuando la meta está completada -->
+        <TextView
+            android:id="@+id/tv_goal_completed_msg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="🌸 ¡Meta completada! Tu planta floreció."
+            android:textColor="#ec4899"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- Fila 4: Botones de Acción (+ Gasto, + Ingreso, Ver metas) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/btn_quick_expense"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/widget_button_pill"
+            android:gravity="center"
+            android:text="- Gasto"
+            android:textColor="#f87171"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/btn_quick_income"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/widget_button_pill"
+            android:gravity="center"
+            android:text="+ Ingreso"
+            android:textColor="#22c55e"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/btn_view_goals"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_weight="1.2"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/widget_button_pill"
+            android:gravity="center"
+            android:text="Ver metas"
+            android:textColor="#38bdf8"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</LinearLayout>
