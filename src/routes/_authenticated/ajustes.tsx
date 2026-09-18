@@ -1,8 +1,8 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, Target, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,7 +22,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  useBudgets,
   useCategories,
   useProfile,
   useRestoreDefaultCategories,
@@ -146,7 +145,6 @@ function Ajustes() {
 
 
       <CategoriesSection emojis={EMOJIS} />
-      <BudgetsSection />
       <SecuritySection />
       <DataSection />
 
@@ -289,28 +287,6 @@ function CategoriesSection({ emojis }: { emojis: string[] }) {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-    </section>
-  );
-}
-
-function BudgetsSection() {
-  const { data: budgets = [] } = useBudgets();
-
-  return (
-    <section className="surface p-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="flex items-center gap-2 text-base font-semibold">
-            <Target className="h-4 w-4 text-primary" aria-hidden /> Metas mensuales ({budgets.length})
-          </h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Las metas de gasto ahora se gestionan y visualizan en tiempo real directamente desde tu pantalla de Inicio.
-          </p>
-        </div>
-        <Button asChild variant="secondary" className="h-10 shrink-0 rounded-xl">
-          <Link to="/inicio">Ir a Metas en Inicio</Link>
-        </Button>
-      </div>
     </section>
   );
 }
